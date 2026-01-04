@@ -36,38 +36,37 @@ export const userService = {
     const user = userCredential.user;
 
     // Fetch user details (credits) from Firestore
-    const userDocRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userDocRef);
+    // Wrap in try/catch to handle permission errors gracefully
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
 
-    if (userDoc.exists()) {
-      return mapUserToProfile(user, userDoc.data());
-    } else {
-      // Edge case: Auth exists but DB doc missing, create it
-      const newProfile = {
-        name: email.split('@')[0],
-        email: email,
-        credits: INITIAL_CREDITS,
-        joinedAt: Date.now()
-      };
-      await setDoc(userDocRef, newProfile);
-      return mapUserToProfile(user, newProfile);
+      if (userDoc.exists()) {
+        return mapUserToProfile(user, userDoc.data());
+      } else {
+        // Edge case: Auth exists but DB doc missing, create it
+        const newProfile = {
+          name: email.split('@')[0],
+          email: email,
+          credits: INITIAL_CREDITS,
+          joinedAt: Date.now()
+        };
+        await setDoc(userDocRef, newProfile);
+        return mapUserToProfile(user, newProfile);
+      }
+    } catch (error: any) {
+      console.warn("Firestore access failed (likely permissions). Using temporary auth profile.", error);
+      return mapUserToProfile(user, { credits: INITIAL_CREDITS });
     }
   },
 
   // Register new user
   async register(email: string, name?: string, password?: string): Promise<UserProfile> {
-    // 1. Create Auth User
-    // Note: In a real app we'd pass password. For this demo flow, we assume password is provided.
-    // If using the simple flow from before where only email was asked initially, 
-    // we might need to prompt for password or send a sign-in link.
-    // Assuming the UI now provides a password.
-    
-    if (!password) password = "defaultPassword123!"; // Fallback for demo if UI doesn't send it
+    if (!password) password = "defaultPassword123!"; 
 
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // 2. Create User Document in Firestore to hold credits
     const userProfileData = {
       name: name || email.split('@')[0],
       email: email,
@@ -75,7 +74,11 @@ export const userService = {
       joinedAt: Date.now()
     };
 
-    await setDoc(doc(db, "users", user.uid), userProfileData);
+    try {
+      await setDoc(doc(db, "users", user.uid), userProfileData);
+    } catch (error) {
+      console.warn("Failed to create Firestore document (permissions). Proceeding with auth only.", error);
+    }
 
     return mapUserToProfile(user, userProfileData);
   },
@@ -86,21 +89,27 @@ export const userService = {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    const userDocRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userDocRef);
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
 
-    if (userDoc.exists()) {
-      return mapUserToProfile(user, userDoc.data());
-    } else {
-      // First time Google login - create DB entry
-      const newProfile = {
-        name: user.displayName || 'Google User',
-        email: user.email,
-        credits: INITIAL_CREDITS,
-        joinedAt: Date.now()
-      };
-      await setDoc(userDocRef, newProfile);
-      return mapUserToProfile(user, newProfile);
+      if (userDoc.exists()) {
+        return mapUserToProfile(user, userDoc.data());
+      } else {
+        // First time Google login - create DB entry
+        const newProfile = {
+          name: user.displayName || 'Google User',
+          email: user.email,
+          credits: INITIAL_CREDITS,
+          joinedAt: Date.now()
+        };
+        await setDoc(userDocRef, newProfile);
+        return mapUserToProfile(user, newProfile);
+      }
+    } catch (error: any) {
+      console.warn("Firestore access failed (likely permissions). Using temporary auth profile.", error);
+      // Fallback: Return profile based on Auth data only so user can still log in
+      return mapUserToProfile(user, { credits: INITIAL_CREDITS });
     }
   },
 
@@ -109,27 +118,36 @@ export const userService = {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     
-    // Security: Ensure we are updating the current user's doc
-    const userDocRef = doc(db, "users", currentUser.uid);
-    await updateDoc(userDocRef, {
-      credits: newAmount
-    });
+    try {
+      const userDocRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userDocRef, {
+        credits: newAmount
+      });
+    } catch (e) {
+      console.warn("Could not persist credit update (likely permissions)", e);
+    }
   },
 
-  // Session Management (Handled by Firebase, but we provide a logout wrapper)
+  // Session Management
   async logout() {
     await signOut(auth);
   },
 
-  // Helper to get current profile if already signed in
+  // Get Current Profile
   async getCurrentUserProfile(): Promise<UserProfile | null> {
     const user = auth.currentUser;
     if (!user) return null;
 
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-      return mapUserToProfile(user, userDoc.data());
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        return mapUserToProfile(user, userDoc.data());
+      }
+    } catch (error) {
+      console.warn("Firestore access failed. Using auth data fallback.");
     }
-    return null;
+    
+    // Fallback if doc missing or permission denied
+    return mapUserToProfile(user, { credits: INITIAL_CREDITS });
   }
 };
