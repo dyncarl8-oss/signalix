@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, Mail, Lock, ArrowRight, CheckCircle2, ArrowLeft, KeyRound, AlertTriangle } from 'lucide-react';
+import { Activity, Mail, Lock, ArrowRight, CheckCircle2, ArrowLeft, KeyRound, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 import { userService } from '../services/userService';
 import { UserProfile } from '../types';
 
@@ -17,17 +17,27 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  
+  // Specific state for the "Email Unverified" scenario
+  const [showResend, setShowResend] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setShowResend(false);
     
     try {
       const user = await userService.login(email, password);
       onLoginSuccess(user);
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      if (err.message === 'EMAIL_NOT_VERIFIED') {
+        setError('Email not verified yet.');
+        setShowResend(true);
+      } else {
+        setError(err.message || 'Authentication failed');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -40,11 +50,31 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
 
     try {
       await userService.register(email, undefined, password);
+      // Explicitly switch mode to show the success message
       setMode('verify-sent');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    try {
+      await userService.resendVerification(email, password);
+      setSuccessMsg("Verification email resent! Please check your inbox and spam folder.");
+      setShowResend(false); // Hide the button, show success
+      setError('');
+    } catch (err: any) {
+      if (err.message === 'ALREADY_VERIFIED') {
+         setError('Account is already verified. Please try logging in.');
+         setShowResend(false);
+      } else {
+         setError(err.message || "Failed to resend email.");
+      }
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -101,18 +131,23 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
         {/* Card */}
         <div className="glass-panel p-8 rounded-2xl border border-gray-800 bg-[#0b0b10]/60 backdrop-blur-xl shadow-2xl animate-in fade-in zoom-in-95 duration-500">
           
-          {/* VERIFY SENT MODE */}
+          {/* VERIFY SENT MODE (Post-Signup) */}
           {mode === 'verify-sent' && (
             <div className="text-center">
               <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/50 shadow-[0_0_20px_rgba(34,197,94,0.3)]">
                  <CheckCircle2 className="w-8 h-8 text-green-400" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Verify Your Email</h2>
-              <p className="text-gray-400 text-sm mb-6">
-                 We've sent a verification link to <span className="text-white font-mono">{email}</span>. Please check your inbox (and spam) to activate your account.
+              <h2 className="text-2xl font-bold text-white mb-2">Check Your Inbox</h2>
+              <p className="text-gray-400 text-sm mb-4 leading-relaxed">
+                 We've sent a verification link to <span className="text-white font-mono block mt-1 bg-gray-800 rounded py-1">{email}</span>
               </p>
+              <div className="p-3 bg-yellow-900/20 border border-yellow-700/30 rounded mb-6">
+                 <p className="text-yellow-400 text-xs font-bold flex items-center justify-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Please check your Spam folder!
+                 </p>
+              </div>
               <button 
-                 onClick={() => setMode('login')}
+                 onClick={() => { setMode('login'); setError(''); setShowResend(false); }}
                  className="w-full h-12 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold transition-colors"
               >
                  Return to Login
@@ -193,10 +228,32 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
                      <div className="flex-grow border-t border-gray-800"></div>
                   </div>
 
+                  {successMsg && (
+                    <div className="p-3 bg-green-900/30 border border-green-500/30 rounded text-green-400 text-xs text-center">
+                      {successMsg}
+                    </div>
+                  )}
+
                   <form onSubmit={mode === 'login' ? handleLogin : handleSignup} className="space-y-4">
                      {error && (
-                       <div className="p-3 bg-red-900/30 border border-red-500/30 rounded text-red-400 text-xs text-center flex items-center justify-center gap-2">
-                         <AlertTriangle className="w-3 h-3" /> {error}
+                       <div className="p-3 bg-red-900/30 border border-red-500/30 rounded flex flex-col items-center justify-center gap-2 animate-in fade-in zoom-in duration-300">
+                         <div className="text-red-400 text-xs text-center flex items-center gap-2 font-bold">
+                            <AlertTriangle className="w-3 h-3" /> {error}
+                         </div>
+                         {showResend && (
+                            <div className="w-full mt-1">
+                               <p className="text-[10px] text-gray-400 text-center mb-2">Did you miss the email? Check spam or:</p>
+                               <button
+                                 type="button"
+                                 onClick={handleResendVerification}
+                                 disabled={resendLoading}
+                                 className="w-full py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs rounded border border-red-500/30 flex items-center justify-center gap-2 transition-colors"
+                               >
+                                 {resendLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                                 Resend Verification Email
+                               </button>
+                            </div>
+                         )}
                        </div>
                      )}
                      
@@ -260,7 +317,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
 
                <div className="mt-6 text-center">
                   <button 
-                     onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(''); }}
+                     onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(''); setSuccessMsg(''); setShowResend(false); }}
                      className="text-sm text-gray-500 hover:text-cyan-400 transition-colors"
                   >
                      {mode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Sign in"}

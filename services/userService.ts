@@ -37,16 +37,18 @@ export const userService = {
   async login(email: string, password?: string): Promise<UserProfile> {
     if (!password) throw new Error("Password required");
     
+    // 1. Attempt Sign In
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Email Verification Check
+    // 2. Email Verification Check
     if (!user.emailVerified) {
       await signOut(auth);
-      throw new Error("Email not verified. Please check your inbox.");
+      // Throw a specific string we can catch in the UI
+      throw new Error("EMAIL_NOT_VERIFIED");
     }
 
-    // Fetch user details (credits) from Firestore
+    // 3. Fetch user details (credits) from Firestore
     try {
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
@@ -98,6 +100,24 @@ export const userService = {
     await signOut(auth);
   },
 
+  // Resend Verification Email
+  // Note: We must temporarily sign them in to send the email, then sign them out.
+  async resendVerification(email: string, password?: string): Promise<void> {
+    if (!password) throw new Error("Password required to resend verification.");
+    
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    if (user.emailVerified) {
+       // Already verified, just return
+       await signOut(auth);
+       throw new Error("ALREADY_VERIFIED");
+    }
+
+    await sendEmailVerification(user);
+    await signOut(auth);
+  },
+
   // Password Reset
   async resetPassword(email: string): Promise<void> {
     await sendPasswordResetEmail(auth, email);
@@ -137,7 +157,6 @@ export const userService = {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     
-    // Pro users should not really need this, but we keep it for consistency
     try {
       const userDocRef = doc(db, "users", currentUser.uid);
       await updateDoc(userDocRef, {
@@ -155,7 +174,7 @@ export const userService = {
 
     try {
       const userDocRef = doc(db, "users", currentUser.uid);
-      const updates = { isPro: true, credits: 999999 }; // Flag and logic safety
+      const updates = { isPro: true, credits: 999999 };
       await updateDoc(userDocRef, updates);
       
       const updatedDoc = await getDoc(userDocRef);
@@ -176,7 +195,6 @@ export const userService = {
     const user = auth.currentUser;
     if (!user) return null;
 
-    // Check verification status here too
     if (!user.emailVerified) {
       return null;
     }
@@ -189,23 +207,18 @@ export const userService = {
         const profileData = userDoc.data();
         let currentProfile = mapUserToProfile(user, profileData);
 
-        // SYNC CHECK: If locally Pro, verify with Polar backend
         if (currentProfile.isPro && currentProfile.email) {
            try {
              const status = await paymentService.checkSubscriptionStatus(currentProfile.email);
-             
              if (!status.isPro) {
-                // EXPIRED! Downgrade
-                console.log("Subscription expired. Downgrading user...");
                 await updateDoc(userDocRef, { isPro: false, credits: 3 }); 
                 currentProfile.isPro = false;
                 currentProfile.credits = 3;
              }
            } catch (err) {
-             console.warn("Failed to sync subscription status, keeping local state.", err);
+             console.warn("Failed sync", err);
            }
         }
-
         return currentProfile;
       }
     } catch (error) {

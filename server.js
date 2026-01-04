@@ -21,10 +21,8 @@ app.use(express.static(path.join(__dirname, 'dist')));
 
 // --- GEMINI AI ANALYSIS ENDPOINT ---
 const MODEL_CHAIN = [
-  'gemini-2.5-pro',
-  'gemini-flash-latest',
-  'gemini-2.5-flash',
-  'gemini-flash-lite-latest'
+  'gemini-3-pro-preview',
+  'gemini-3-flash-preview'
 ];
 
 // Helper to reliably parse JSON even if the model adds markdown or junk
