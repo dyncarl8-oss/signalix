@@ -7,8 +7,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, (process as any).cwd(), '');
 
   // Use the specific key provided by the user if not in env, or override it.
-  // For this request, we prioritize the user's provided key.
-  const API_KEY = "AIzaSyDO8xhhzWyox1xNPskUeal1jN2IKNdpIQs";
+  // Updated key per user request
+  const API_KEY = "AIzaSyBTLkZrKxhT_1zU7DE8qTwNYl5mvunzO-4";
 
   return {
     plugins: [react()],

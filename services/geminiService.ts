@@ -1,11 +1,12 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AIAnalysisResult, OHLCData, TechnicalIndicators } from '../types';
 
-// Define the fallback chain requested by the user
+// Fallback chain: Updated strictly per user request
 const MODEL_CHAIN = [
-  'gemini-1.5-pro', // "gemini-2.5-pro" requested, mapping to current stable Pro (1.5) to ensure functionality.
-  'gemini-flash-latest',       // Fallback 1
-  'gemini-flash-lite-latest'   // Fallback 2
+  'gemini-2.5-pro',             // Primary
+  'gemini-flash-latest',        // Fallback 1
+  'gemini-flash-lite-latest',   // Fallback 2
+  'gemini-2.5-flash'            // Fallback 3
 ];
 
 export const analyzeMarket = async (
@@ -14,8 +15,13 @@ export const analyzeMarket = async (
   ohlc: OHLCData[],
   indicators: TechnicalIndicators
 ): Promise<AIAnalysisResult> => {
+  console.log(`[SignalixAI] Starting Market Analysis for ${pairName} (${timeframe})`);
+  
   if (!process.env.API_KEY) {
+    console.error("[SignalixAI] Critical Error: API Key is missing from process.env");
     throw new Error("API Key is missing.");
+  } else {
+    console.log("[SignalixAI] API Key found (Masked):", process.env.API_KEY.substring(0, 8) + "...");
   }
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -65,11 +71,12 @@ export const analyzeMarket = async (
   // Helper to try models in sequence
   const tryGenerate = async (modelIndex: number): Promise<AIAnalysisResult> => {
     if (modelIndex >= MODEL_CHAIN.length) {
+      console.error("[SignalixAI] All models in the chain failed.");
       throw new Error("All AI models failed to respond. Please try again later.");
     }
 
     const currentModel = MODEL_CHAIN[modelIndex];
-    console.log(`Attempting analysis with model: ${currentModel}`);
+    console.log(`[SignalixAI] Attempting analysis with model [${modelIndex + 1}/${MODEL_CHAIN.length}]: ${currentModel}`);
 
     try {
       const config: any = {
@@ -93,28 +100,43 @@ export const analyzeMarket = async (
         }
       };
 
+      console.log(`[SignalixAI] Sending request to ${currentModel}...`);
       const response = await ai.models.generateContent({
         model: currentModel,
         contents: prompt,
         config: config
       });
+      console.log(`[SignalixAI] Response received from ${currentModel}.`);
 
       const resultText = response.text;
-      if (!resultText) throw new Error("No response text from AI");
+      if (!resultText) {
+        throw new Error(`Model ${currentModel} returned empty response.`);
+      }
+
+      console.log(`[SignalixAI] Parsing JSON response from ${currentModel}...`);
       
-      return JSON.parse(resultText) as AIAnalysisResult;
+      try {
+        const parsed = JSON.parse(resultText) as AIAnalysisResult;
+        console.log(`[SignalixAI] Analysis successful with ${currentModel}. Verdict: ${parsed.verdict}`);
+        return parsed;
+      } catch (e) {
+        console.error(`[SignalixAI] JSON Parse Error for model ${currentModel}. Raw text:`, resultText);
+        throw new Error("Invalid JSON response from AI");
+      }
 
     } catch (error: any) {
-      console.warn(`Model ${currentModel} failed:`, error.message);
+      console.warn(`[SignalixAI] Model ${currentModel} failed. Error:`, error.message);
+      
       // Recursive call to next model
+      console.log(`[SignalixAI] Falling back to next model...`);
       return tryGenerate(modelIndex + 1);
     }
   };
 
   try {
     return await tryGenerate(0);
-  } catch (error) {
-    console.error("Gemini Analysis Final Failure:", error);
+  } catch (error: any) {
+    console.error("[SignalixAI] Final Analysis Failure:", error.message);
     throw error;
   }
 };
