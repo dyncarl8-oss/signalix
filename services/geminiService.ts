@@ -17,9 +17,9 @@ export const analyzeMarket = async (
 ): Promise<AIAnalysisResult> => {
   console.log(`[SignalixAI] Starting Market Analysis for ${pairName} (${timeframe})`);
   
-  if (!process.env.API_KEY) {
-    console.error("[SignalixAI] Critical Error: API Key is missing from process.env");
-    throw new Error("API Key is missing.");
+  if (!process.env.API_KEY || process.env.API_KEY.includes("PASTE_YOUR")) {
+    console.error("[SignalixAI] Critical Error: API Key is missing or default placeholder.");
+    throw new Error("Invalid API Key. Please update vite.config.ts with a valid Gemini API Key.");
   } else {
     console.log("[SignalixAI] API Key found (Masked):", process.env.API_KEY.substring(0, 8) + "...");
   }
@@ -72,7 +72,7 @@ export const analyzeMarket = async (
   const tryGenerate = async (modelIndex: number): Promise<AIAnalysisResult> => {
     if (modelIndex >= MODEL_CHAIN.length) {
       console.error("[SignalixAI] All models in the chain failed.");
-      throw new Error("All AI models failed to respond. Please try again later.");
+      throw new Error("All AI models failed to respond. Please check your API Key and quota.");
     }
 
     const currentModel = MODEL_CHAIN[modelIndex];
@@ -125,7 +125,20 @@ export const analyzeMarket = async (
       }
 
     } catch (error: any) {
-      console.warn(`[SignalixAI] Model ${currentModel} failed. Error:`, error.message);
+      const errorMsg = error.message || JSON.stringify(error);
+      
+      // CRITICAL: Fail fast if API key is invalid/blocked/leaked
+      if (
+        errorMsg.includes("leaked") || 
+        errorMsg.includes("API key") || 
+        errorMsg.includes("PERMISSION_DENIED") || 
+        errorMsg.includes("403")
+      ) {
+        console.error(`[SignalixAI] FATAL AUTH ERROR on ${currentModel}:`, errorMsg);
+        throw new Error(`FATAL: API Key is invalid or leaked. Please replace the key in vite.config.ts. Google says: ${errorMsg}`);
+      }
+
+      console.warn(`[SignalixAI] Model ${currentModel} failed (recoverable). Error:`, errorMsg);
       
       // Recursive call to next model
       console.log(`[SignalixAI] Falling back to next model...`);

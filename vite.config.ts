@@ -6,9 +6,8 @@ export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   const env = loadEnv(mode, (process as any).cwd(), '');
 
-  // Use the specific key provided by the user if not in env, or override it.
-  // Updated key per user request
-  const API_KEY = "AIzaSyBTLkZrKxhT_1zU7DE8qTwNYl5mvunzO-4";
+  // Read API_KEY from .env file
+  const API_KEY = env.API_KEY;
 
   return {
     plugins: [react()],

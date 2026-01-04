@@ -1,6 +1,7 @@
 import { CryptoPair } from './types';
 
-export const CRYPTOCOMPARE_API_KEY = '8a639309466b93ee7cbfafaae16279eb22cffe30d1c68a25d0047d2a77d43ab2';
+// Read from environment variable (Vite prefix required) or fallback to the provided key
+export const CRYPTOCOMPARE_API_KEY = import.meta.env.VITE_CRYPTOCOMPARE_API_KEY || '8a639309466b93ee7cbfafaae16279eb22cffe30d1c68a25d0047d2a77d43ab2';
 export const CRYPTOCOMPARE_API_BASE = 'https://min-api.cryptocompare.com/data/v2';
 
 export const SUPPORTED_PAIRS: CryptoPair[] = [
