@@ -92,6 +92,9 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
     runAnalysis(selectedPair!, tf);
   };
 
+  // Helper for consistent delays
+  const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
   const runAnalysis = async (pair: CryptoPair, tf: string) => {
     // Pro users bypass credit check
     if (!user.isPro && credits < COST_PER_ANALYSIS) {
@@ -106,8 +109,8 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
     try {
       const startTime = Date.now();
       
-      // DRAMATIC DELAY: Data Fetching (2.5 seconds)
-      await new Promise(r => setTimeout(r, 2500));
+      // Delay: Data Fetching (2.5 seconds)
+      await wait(2500);
       
       const ohlc = await fetchOHLCData(pair.base, pair.quote, tf);
       const dataDuration = (Date.now() - startTime) / 1000;
@@ -118,13 +121,16 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       });
       setTimeout(scrollToBottom, 100);
 
+      // --- TRANSITION DELAY 1 ---
+      // Smooth pause before next step appears
+      await wait(1500);
+
       // 2. Technical Analysis
       const step2Id = addFeedItem('step-technical', {}, 'loading');
       setTimeout(scrollToBottom, 200);
 
-      // DRAMATIC DELAY: Calculating Indicators (4 seconds)
-      // This simulates "crunching numbers"
-      await new Promise(r => setTimeout(r, 4000)); 
+      // Delay: Calculating Indicators (3.5 seconds)
+      await wait(3500); 
       
       const techStartTime = Date.now();
       const indicators = computeIndicators(ohlc);
@@ -136,13 +142,15 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       });
       setTimeout(scrollToBottom, 100);
 
+      // --- TRANSITION DELAY 2 ---
+      await wait(1500);
+
       // 3. Signal Aggregation
       const step3Id = addFeedItem('step-aggregation', {}, 'loading');
       setTimeout(scrollToBottom, 200);
 
-      // DRAMATIC DELAY: Weighing Signals (3.5 seconds)
-      // Simulates the system balancing bullish/bearish factors
-      await new Promise(r => setTimeout(r, 3500)); 
+      // Delay: Weighing Signals (3 seconds)
+      await wait(3000); 
       
       // Calculate aggregation locally
       let up = 0, down = 0, neutral = 0;
@@ -182,6 +190,9 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       });
       setTimeout(scrollToBottom, 100);
 
+      // --- TRANSITION DELAY 3 ---
+      await wait(1500);
+
       // 4. AI Deep Analysis
       const step4Id = addFeedItem('step-ai', {}, 'loading');
       setTimeout(scrollToBottom, 200);
@@ -208,13 +219,12 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
         if (i % 10 === 0) scrollToBottom();
         
         // Random delay between 20ms and 50ms per small chunk
-        // This makes the text stream take several seconds to complete
         const delay = 20 + Math.random() * 30;
-        await new Promise(r => setTimeout(r, delay));
+        await wait(delay);
       }
 
       // Add a small pause after thinking finishes before marking complete
-      await new Promise(r => setTimeout(r, 800));
+      await wait(800);
 
       updateFeedItem(step4Id, {
         status: 'complete',
@@ -224,7 +234,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
 
       // CHECK VERDICT
       if (analysis.verdict === 'NEUTRAL') {
-        await new Promise(r => setTimeout(r, 1000));
+        await wait(1000);
         addFeedItem('system-message', { 
           text: `Analysis Inconclusive: Market conditions are completely flat. No actionable signal detected.` 
         });
@@ -236,10 +246,19 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
           setCredits(prev => prev - COST_PER_ANALYSIS);
         }
 
-        // 5. Final Verdict
-        // LONG DELAY (2 seconds) for dramatic reveal
-        await new Promise(r => setTimeout(r, 2000)); 
+        // --- FINAL VERDICT TRANSITION ---
         
+        // 1. Show "Generating..." message
+        await wait(500);
+        addFeedItem('system-message', { 
+          text: "Synthesizing data points. Generating final verdict strategy..." 
+        });
+        scrollToBottom();
+
+        // 2. Wait for the user to read it (Believable delay)
+        await wait(2500); 
+        
+        // 3. Show Result
         addFeedItem('step-verdict', { result: analysis });
         setSessionState('complete');
         setTimeout(scrollToBottom, 100);
