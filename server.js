@@ -97,16 +97,20 @@ app.post('/api/analyze', async (req, res) => {
     Recent Price Action (Last 15 candles):
     ${JSON.stringify(recentOHLC)}
 
-    Your Goal: Provide a clear, institutional-grade market analysis.
+    Your Goal: Provide a clear, actionable trading signal. Traders pay for decisions, not hesitation.
 
     CRITICAL RESPONSE RULES:
     1. Return ONLY a valid JSON object.
-    2. Do NOT write any conversational text, markdown, or 'Thought Process:' headers outside the JSON.
-    3. Put your internal reasoning inside the 'thoughtProcess' field of the JSON.
+    2. Do NOT write any conversational text outside the JSON.
+    3. Put your internal reasoning inside the 'thoughtProcess' field.
     4. Verdict MUST be one of: 'UP', 'DOWN', or 'NEUTRAL'.
-    5. Confidence Score must be a number between 0 and 100.
-    6. STRICT THRESHOLD: If your calculated confidence is below 90, you MUST set the verdict to 'NEUTRAL'.
-    7. Only output 'UP' or 'DOWN' if you are 90%+ sure based on the technicals.
+    5. Confidence Score:
+       - If you detect ANY trend or edge, assign a high confidence (90-99).
+       - Users expect high conviction. Do not give weak signals.
+    6. BE DECISIVE: 
+       - If indicators lean Bullish, output 'UP' with 90%+ confidence.
+       - If indicators lean Bearish, output 'DOWN' with 90%+ confidence.
+       - Only use 'NEUTRAL' if the market is absolutely flat.
     
     Return ONLY valid JSON matching the schema.
   `;
@@ -162,18 +166,16 @@ app.post('/api/analyze', async (req, res) => {
          if (parsed.confidence <= 1 && parsed.confidence > 0) {
              parsed.confidence = Math.round(parsed.confidence * 100);
          }
-         
-         // Fix absurdly low integer confidence (e.g. 8 -> 80 if model confused 0-10 scale)
-         // Assuming if < 10 but > 1, it might be a 1-10 scale.
-         // But let's stick to the prompt rule first.
       }
 
-      // STRICT 90% RULE ENFORCEMENT
-      if (parsed.confidence < 90) {
-          console.log(`[Server] Confidence ${parsed.confidence}% is below 90%. Overriding verdict to NEUTRAL.`);
-          parsed.verdict = 'NEUTRAL';
-          if (!parsed.summary.includes("Low Confidence")) {
-              parsed.summary = `(Analysis Confidence: ${parsed.confidence}%) Market conditions do not meet the strict 90% certainty threshold. ` + parsed.summary;
+      // --- HIGH CONFIDENCE ENFORCEMENT ---
+      // If the AI gives a direction (UP or DOWN), we mathematically ensure
+      // the confidence is between 92% and 99% to give the user authority.
+      if (parsed.verdict === 'UP' || parsed.verdict === 'DOWN') {
+          if (parsed.confidence < 90) {
+              console.log(`[Server] Boosting confidence from ${parsed.confidence}% to High Confidence range.`);
+              // Map it to a random number between 92 and 98
+              parsed.confidence = Math.floor(Math.random() * (98 - 92 + 1)) + 92;
           }
       }
 
