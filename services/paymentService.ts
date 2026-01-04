@@ -29,5 +29,11 @@ export const paymentService = {
       console.error('Checkout error:', error);
       throw error;
     }
+  },
+
+  openPortal() {
+    // In production, this would be https://polar.sh/purchases or your org's portal
+    // For now, we use the sandbox URL to match the checkout environment
+    window.open('https://sandbox.polar.sh/purchases', '_blank');
   }
 };

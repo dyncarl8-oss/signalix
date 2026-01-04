@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Activity, Coins, RefreshCw, Zap, LogOut, User, ChevronDown, Crown } from 'lucide-react';
+import { Activity, Coins, RefreshCw, Zap, LogOut, User, ChevronDown, Crown, CreditCard } from 'lucide-react';
 import { CryptoPair, FeedItem, AggregationResult, UserProfile } from '../types';
 import { COST_PER_ANALYSIS } from '../constants';
 import { fetchOHLCData } from '../services/cryptoService';
 import { computeIndicators } from '../services/indicatorService';
 import { analyzeMarket } from '../services/geminiService';
 import { userService } from '../services/userService';
+import { paymentService } from '../services/paymentService';
 
 // Components
 import VerdictCard from './VerdictCard';
@@ -339,7 +340,16 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                         <p className="text-xs text-gray-500 truncate font-mono mt-0.5">{user.email}</p>
                         {user.isPro && <p className="text-[10px] text-yellow-500 font-bold mt-1">★ PRO PLAN</p>}
                      </div>
-                     <div className="p-1">
+                     <div className="p-1 space-y-1">
+                       {user.isPro && (
+                         <button
+                           onClick={() => paymentService.openPortal()}
+                           className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white rounded-lg transition-colors flex items-center gap-2"
+                         >
+                           <CreditCard className="w-4 h-4" />
+                           Manage Subscription
+                         </button>
+                       )}
                        <button 
                          onClick={onLogout}
                          className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-900/10 hover:text-red-300 rounded-lg transition-colors flex items-center gap-2"
