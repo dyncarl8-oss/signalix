@@ -49,7 +49,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
                  onClick={onGetStarted}
                  className="px-4 py-2 bg-cyber-cyan hover:bg-cyan-400 text-black font-bold text-xs font-mono uppercase tracking-wider transition-all hover:shadow-[0_0_20px_rgba(0,243,255,0.4)] clip-path-polygon"
                >
-                 Initialize >
+                 Initialize &gt;
                </button>
             </div>
           </div>
@@ -73,7 +73,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
             </h1>
             
             <p className="text-lg text-gray-400 max-w-lg leading-relaxed font-light">
-              <span className="text-cyber-cyan font-mono">>_</span> Decrypt market noise. Real-time neural analysis for the modern trader. We process the data; you execute the trade.
+              <span className="text-cyber-cyan font-mono">&gt;_</span> Decrypt market noise. Real-time neural analysis for the modern trader. We process the data; you execute the trade.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
