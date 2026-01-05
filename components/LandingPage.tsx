@@ -41,7 +41,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
               onClick={onGetStarted}
               className="px-5 py-2 rounded-full bg-white text-black font-bold text-sm hover:bg-cyan-400 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)]"
             >
-              Start Trading
+              Get Started
             </button>
           </div>
         </div>
@@ -61,8 +61,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
           </h1>
           
           <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
-            The world's first trading terminal that shows you its thought process. 
-            Powered by <span className="text-white font-bold">Gemini Pro</span>, seeing beyond the charts with institutional-grade reasoning.
+             Unlock institutional-grade market insights with transparent AI reasoning. 
+             Powered by <span className="text-white font-bold">Gemini 2.0 Flash</span>, SignalixAI sees beyond the charts to reveal the 'why' behind every price movement.
           </p>
           
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
@@ -70,10 +70,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
               onClick={onGetStarted}
               className="px-8 py-4 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-lg hover:brightness-110 transition-all shadow-[0_0_30px_rgba(6,182,212,0.3)] flex items-center gap-2 group"
             >
-              Launch Terminal <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="px-8 py-4 rounded-lg bg-gray-900/50 border border-gray-700 text-gray-300 font-bold hover:bg-gray-800 transition-colors">
-              View Live Demo
+              Start AI Analysis <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>
@@ -141,7 +138,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
 
       {/* Footer */}
       <footer className="border-t border-gray-900 py-12 bg-[#020204] relative z-10">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
            <div className="col-span-1 md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
                 <Activity className="text-cyan-500 w-5 h-5" />
@@ -152,17 +149,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
                  Data provided by CryptoCompare. Intelligence provided by Gemini.
               </p>
            </div>
-           <div>
-              <h4 className="font-bold text-white mb-4">Platform</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                 <li><button className="hover:text-cyan-400">Terminal</button></li>
-                 <li><button className="hover:text-cyan-400">Pricing</button></li>
-                 <li><button className="hover:text-cyan-400">API Access</button></li>
-              </ul>
-           </div>
-           <div>
+           
+           <div className="flex flex-col items-start md:items-end">
               <h4 className="font-bold text-white mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
+              <ul className="space-y-2 text-sm text-gray-500 text-left md:text-right">
                  <li><button className="hover:text-cyan-400">Terms of Service</button></li>
                  <li><button className="hover:text-cyan-400">Privacy Policy</button></li>
                  <li><button className="hover:text-cyan-400">Risk Disclosure</button></li>
@@ -170,7 +160,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
            </div>
         </div>
         <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-gray-900 text-center text-xs text-gray-600">
-           &copy; 2024 SignalixAI. All rights reserved. Trading involves risk.
+           &copy; 2026 SignalixAI. All rights reserved. Trading involves risk.
         </div>
       </footer>
     </div>
