@@ -176,6 +176,10 @@ export const userService = {
     try {
       await sendPasswordResetEmail(auth, email);
     } catch (error: any) {
+      // Handle user-not-found specifically for clearer context, if enumeration protection is OFF.
+      if (error.code === 'auth/user-not-found') {
+         throw new Error("No account found with this email address.");
+      }
       throw new Error(getFriendlyErrorMessage(error));
     }
   },

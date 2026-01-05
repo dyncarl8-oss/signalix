@@ -26,6 +26,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
   const [showResend, setShowResend] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
 
+  // Helper to clear messages when switching modes
+  const switchMode = (newMode: AuthMode) => {
+    setMode(newMode);
+    setError('');
+    setSuccessMsg('');
+    setShowResend(false);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsEmailLoading(true);
@@ -90,7 +98,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
 
     try {
       await userService.resetPassword(email);
-      setSuccessMsg('Password reset link sent to your email.');
+      // Improved message to manage user expectations regarding security privacy (Enumeration Protection)
+      setSuccessMsg('If an account exists with this email, a reset link has been sent. Please check your inbox and spam folder.');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -157,7 +166,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
               </p>
 
               <button 
-                 onClick={() => { setMode('login'); setError(''); setShowResend(false); }}
+                 onClick={() => switchMode('login')}
                  className="w-full h-12 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold transition-colors border border-gray-700 hover:border-gray-600"
               >
                  Return to Login
@@ -168,14 +177,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
           {/* FORGOT PASSWORD MODE */}
           {mode === 'forgot-password' && (
             <div>
-               <button onClick={() => setMode('login')} className="flex items-center gap-2 text-gray-500 hover:text-white text-sm mb-6 transition-colors">
+               <button onClick={() => switchMode('login')} className="flex items-center gap-2 text-gray-500 hover:text-white text-sm mb-6 transition-colors">
                   <ArrowLeft className="w-4 h-4" /> Back to Login
                </button>
                <h2 className="text-2xl font-bold text-white mb-2">Reset Password</h2>
                <p className="text-gray-400 text-sm mb-6">Enter your email to receive password reset instructions.</p>
 
                {successMsg ? (
-                 <div className="p-4 bg-green-900/30 border border-green-500/30 rounded text-green-400 text-sm text-center mb-4">
+                 <div className="p-4 bg-green-900/30 border border-green-500/30 rounded text-green-400 text-sm text-center mb-4 leading-relaxed">
                     {successMsg}
                  </div>
                ) : (
@@ -310,7 +319,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
                         <div className="flex justify-end">
                            <button 
                               type="button"
-                              onClick={() => setMode('forgot-password')}
+                              onClick={() => switchMode('forgot-password')}
                               className="text-xs text-cyan-500 hover:text-cyan-400 transition-colors"
                            >
                               Forgot Password?
@@ -336,7 +345,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
 
                <div className="mt-6 text-center">
                   <button 
-                     onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(''); setSuccessMsg(''); setShowResend(false); }}
+                     onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
                      className="text-sm text-gray-500 hover:text-cyan-400 transition-colors"
                   >
                      {mode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
