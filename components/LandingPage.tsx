@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, ArrowRight, Terminal, Cpu, Shield, Zap, Globe, Lock, BarChart3, TrendingUp } from 'lucide-react';
+import { Activity, ArrowRight, Terminal, Cpu, Shield, Zap, Globe, Lock, BarChart3, TrendingUp, Network, Clock } from 'lucide-react';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -154,32 +154,38 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
       </section>
 
       {/* Static Market Pulse (No movement) */}
-      <div className="border-y border-gray-900 bg-[#08080c] py-6">
+      <div className="border-y border-gray-900 bg-[#08080c] py-6 relative z-20">
          <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+            
             <div className="flex flex-col items-center md:items-start border-r border-gray-900/50 last:border-0">
-               <span className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Market Sentiment</span>
-               <span className="text-sm font-bold text-green-400 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" /> Bullish (62%)
-               </span>
-            </div>
-            <div className="flex flex-col items-center md:items-start border-r border-gray-900/50 last:border-0">
-               <span className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">AI Accuracy (24h)</span>
-               <span className="text-sm font-bold text-cyber-cyan flex items-center gap-2">
-                  <Activity className="w-4 h-4" /> 89.4%
-               </span>
-            </div>
-            <div className="flex flex-col items-center md:items-start border-r border-gray-900/50 last:border-0">
-               <span className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Active Signals</span>
+               <span className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Market Regime</span>
                <span className="text-sm font-bold text-white flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-yellow-500" /> 14 Pairs
+                  <Activity className="w-4 h-4 text-orange-400" /> 
+                  <span>VOLATILE <span className="text-gray-500 font-normal ml-1 text-xs hidden lg:inline">(Accumulation)</span></span>
                </span>
             </div>
+
+            <div className="flex flex-col items-center md:items-start border-r border-gray-900/50 last:border-0">
+               <span className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Neural Accuracy</span>
+               <span className="text-sm font-bold text-cyber-cyan flex items-center gap-2">
+                  <Cpu className="w-4 h-4" /> 94.2% <span className="text-gray-500 font-normal ml-1 text-xs hidden lg:inline">(Last 100)</span>
+               </span>
+            </div>
+
+            <div className="flex flex-col items-center md:items-start border-r border-gray-900/50 last:border-0">
+               <span className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">Live Signals</span>
+               <span className="text-sm font-bold text-white flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-yellow-400" /> 23 Active Setups
+               </span>
+            </div>
+
             <div className="flex flex-col items-center md:items-start">
-               <span className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">System Status</span>
+               <span className="text-[10px] text-gray-600 font-mono uppercase tracking-widest mb-1">System Latency</span>
                <span className="text-sm font-bold text-gray-300 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div> Operational
+                  <Network className="w-4 h-4 text-green-500" /> 12ms <span className="text-gray-500 font-normal ml-1 text-xs hidden lg:inline">(Real-time)</span>
                </span>
             </div>
+
          </div>
       </div>
 

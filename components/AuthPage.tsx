@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, Mail, Lock, ArrowRight, CheckCircle2, ArrowLeft, AlertTriangle, RefreshCw, Loader2, Info } from 'lucide-react';
+import { Activity, Mail, Lock, ArrowRight, CheckCircle2, ArrowLeft, AlertTriangle, RefreshCw, Loader2, Info, Terminal } from 'lucide-react';
 import { userService } from '../services/userService';
 import { UserProfile } from '../types';
 
@@ -13,7 +13,7 @@ type AuthMode = 'login' | 'signup' | 'forgot-password' | 'verify-sent';
 const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
   const [mode, setMode] = useState<AuthMode>('login');
   
-  // Separate loading states to prevent UI flicker on unrelated buttons
+  // Separate loading states to prevent UI flicker
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   
@@ -48,7 +48,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
         setError('Email not verified yet.');
         setShowResend(true);
       } else {
-        // The error message is already cleaned by userService
         setError(err.message);
       }
     } finally {
@@ -98,7 +97,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
 
     try {
       await userService.resetPassword(email);
-      // Improved message to manage user expectations regarding security privacy (Enumeration Protection)
       setSuccessMsg('If an account exists with this email, a reset link has been sent. Please check your inbox and spam folder.');
     } catch (err: any) {
       setError(err.message);
@@ -123,51 +121,49 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
   const isLoading = isEmailLoading || isGoogleLoading;
 
   return (
-    <div className="min-h-screen bg-[#050508] flex items-center justify-center relative overflow-hidden p-4">
-      {/* Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px]"></div>
-         <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[120px]"></div>
-         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+    <div className="min-h-screen bg-cyber-black flex items-center justify-center relative overflow-hidden p-6 font-sans">
+      
+      {/* Background Ambience (Matching Landing Page) */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+         <div className="absolute inset-0 cyber-grid opacity-30"></div>
+         <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-cyber-cyan/5 rounded-full blur-[120px]"></div>
+         <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-purple-900/10 rounded-full blur-[120px]"></div>
       </div>
 
       <div className="w-full max-w-md relative z-10">
         
-        {/* Logo */}
-        <div className="flex justify-center mb-8 cursor-pointer" onClick={onBack}>
-          <div className="flex items-center gap-2">
-             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                <Activity className="text-white w-6 h-6" />
+        {/* Brand Header */}
+        <div className="flex justify-center mb-10 cursor-pointer group" onClick={onBack}>
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 flex items-center justify-center border border-cyber-cyan/30 rounded bg-cyber-cyan/5 group-hover:bg-cyber-cyan/10 transition-colors shadow-[0_0_15px_rgba(0,243,255,0.2)]">
+                <Activity className="text-cyber-cyan w-6 h-6" />
              </div>
-             <span className="font-bold text-2xl text-white">Signalix<span className="text-cyan-400">AI</span></span>
+             <span className="font-bold text-2xl text-white font-mono tracking-wider">SIGNALIX<span className="text-cyber-cyan">_AI</span></span>
           </div>
         </div>
 
-        {/* Card */}
-        <div className="glass-panel p-8 rounded-2xl border border-gray-800 bg-[#0b0b10]/60 backdrop-blur-xl shadow-2xl animate-in fade-in zoom-in-95 duration-500">
+        {/* Main Card */}
+        <div className="glass-panel p-8 rounded-xl border border-gray-800 bg-[#0a0a0f]/80 backdrop-blur-xl shadow-2xl animate-in fade-in zoom-in-95 duration-500 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-cyan to-transparent opacity-50"></div>
           
-          {/* VERIFY SENT MODE (Post-Signup) */}
+          {/* VERIFY SENT MODE */}
           {mode === 'verify-sent' && (
             <div className="text-center animate-in fade-in zoom-in duration-300">
-              <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/50 shadow-[0_0_20px_rgba(34,197,94,0.3)]">
+              <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]">
                  <CheckCircle2 className="w-8 h-8 text-green-400" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Check Your Inbox</h2>
-              <p className="text-gray-400 text-sm mb-4">
-                 We've sent a verification link to
+              <h2 className="text-2xl font-bold text-white mb-2 font-mono">CHECK INBOX</h2>
+              <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                 We've sent a secure verification link to:
               </p>
               
-              <div className="bg-black/40 border border-gray-800 rounded py-2 px-4 inline-block mb-6">
-                 <span className="text-white font-mono text-sm">{email}</span>
+              <div className="bg-black/40 border border-gray-800 rounded py-3 px-4 mb-8">
+                 <span className="text-cyber-cyan font-mono text-sm tracking-wide">{email}</span>
               </div>
               
-              <p className="text-xs text-green-400/70 mb-8 flex items-center justify-center gap-2">
-                 If you don't see it, please check your spam folder.
-              </p>
-
               <button 
                  onClick={() => switchMode('login')}
-                 className="w-full h-12 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold transition-colors border border-gray-700 hover:border-gray-600"
+                 className="w-full py-4 rounded bg-gray-800 hover:bg-gray-700 text-white font-bold font-mono uppercase text-xs tracking-widest transition-colors border border-gray-700 hover:border-gray-600"
               >
                  Return to Login
               </button>
@@ -177,43 +173,43 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
           {/* FORGOT PASSWORD MODE */}
           {mode === 'forgot-password' && (
             <div>
-               <button onClick={() => switchMode('login')} className="flex items-center gap-2 text-gray-500 hover:text-white text-sm mb-6 transition-colors">
-                  <ArrowLeft className="w-4 h-4" /> Back to Login
+               <button onClick={() => switchMode('login')} className="flex items-center gap-2 text-gray-500 hover:text-white text-xs font-mono uppercase mb-8 transition-colors tracking-wide">
+                  <ArrowLeft className="w-3 h-3" /> Back to Login
                </button>
-               <h2 className="text-2xl font-bold text-white mb-2">Reset Password</h2>
-               <p className="text-gray-400 text-sm mb-6">Enter your email to receive password reset instructions.</p>
+               <h2 className="text-2xl font-bold text-white mb-2 font-mono uppercase tracking-tight">Reset Access</h2>
+               <p className="text-gray-400 text-sm mb-8 font-light">Enter your email to receive recovery protocols.</p>
 
                {successMsg ? (
-                 <div className="p-4 bg-green-900/30 border border-green-500/30 rounded text-green-400 text-sm text-center mb-4 leading-relaxed">
+                 <div className="p-4 bg-green-900/10 border border-green-500/20 rounded text-green-400 text-sm text-center mb-4 leading-relaxed font-mono">
                     {successMsg}
                  </div>
                ) : (
-                 <form onSubmit={handleForgotPassword} className="space-y-4">
+                 <form onSubmit={handleForgotPassword} className="space-y-6">
                     {error && (
-                      <div className="p-3 bg-red-900/30 border border-red-500/30 rounded text-red-400 text-xs text-center flex items-center justify-center gap-2">
+                      <div className="p-3 bg-red-900/10 border border-red-500/20 rounded text-red-400 text-xs text-center flex items-center justify-center gap-2 font-mono">
                         <AlertTriangle className="w-4 h-4" /> {error}
                       </div>
                     )}
                     <div>
-                       <label className="block text-xs font-mono text-gray-500 mb-1 ml-1">EMAIL ADDRESS</label>
+                       <label className="block text-[10px] font-mono text-cyber-cyan/70 uppercase tracking-widest mb-2 ml-1">Email Address</label>
                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-600" />
+                          <Mail className="absolute left-4 top-3.5 w-4 h-4 text-gray-500" />
                           <input 
                              type="email" 
                              required
                              value={email}
                              onChange={e => setEmail(e.target.value)}
-                             className="w-full h-12 bg-black/40 border border-gray-800 rounded-lg pl-10 pr-4 text-white placeholder-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all"
-                             placeholder="trader@signalix.ai"
+                             className="w-full h-12 bg-[#050508] border border-gray-800 rounded focus:border-cyber-cyan/50 focus:ring-1 focus:ring-cyber-cyan/20 outline-none transition-all pl-11 pr-4 text-white text-sm font-mono placeholder-gray-700"
+                             placeholder="user@signalix.io"
                           />
                        </div>
                     </div>
                     <button 
                        type="submit"
                        disabled={isEmailLoading}
-                       className="w-full h-12 rounded-lg bg-cyber-cyan hover:bg-cyan-400 text-black font-bold text-sm transition-all shadow-lg shadow-cyan-900/20 flex items-center justify-center gap-2"
+                       className="w-full py-4 bg-cyber-cyan hover:bg-cyan-400 text-black font-bold font-mono text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,243,255,0.2)] hover:shadow-[0_0_30px_rgba(0,243,255,0.4)] flex items-center justify-center gap-2"
                     >
-                       {isEmailLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Reset Link'}
+                       {isEmailLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Reset Link'}
                     </button>
                  </form>
                )}
@@ -223,62 +219,58 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
           {/* LOGIN & SIGNUP MODES */}
           {(mode === 'login' || mode === 'signup') && (
             <>
-               <h2 className="text-2xl font-bold text-white mb-2 text-center">
-                  {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-               </h2>
-               <p className="text-gray-400 text-sm text-center mb-8">
-                  {mode === 'login' ? 'Enter the matrix of market intelligence' : 'Start your journey with 3 free credits'}
-               </p>
+               <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-white mb-2 font-mono uppercase tracking-tight">
+                      {mode === 'login' ? 'System Login' : 'Initialize Account'}
+                  </h2>
+                  <p className="text-gray-400 text-xs font-mono uppercase tracking-widest opacity-70">
+                      {mode === 'login' ? 'Enter credentials to access terminal' : 'Create identity to begin analysis'}
+                  </p>
+               </div>
 
-               <div className="space-y-4">
+               <div className="space-y-5">
                   <button 
                      type="button"
                      onClick={handleGoogleLogin}
                      disabled={isLoading}
-                     className="w-full h-12 rounded-lg bg-white text-black font-bold flex items-center justify-center gap-3 hover:bg-gray-100 transition-colors"
+                     className="w-full h-12 rounded bg-white text-black font-bold font-mono text-xs uppercase tracking-wide flex items-center justify-center gap-3 hover:bg-gray-200 transition-colors"
                   >
                      {isGoogleLoading ? (
-                       <Loader2 className="w-5 h-5 animate-spin text-gray-600" />
+                       <Loader2 className="w-4 h-4 animate-spin text-gray-600" />
                      ) : (
-                       <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                       <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
                      )}
                      {isGoogleLoading ? 'Connecting...' : 'Continue with Google'}
                   </button>
 
                   <div className="relative flex items-center py-2">
                      <div className="flex-grow border-t border-gray-800"></div>
-                     <span className="flex-shrink-0 mx-4 text-gray-600 text-xs uppercase">Or continue with email</span>
+                     <span className="flex-shrink-0 mx-4 text-gray-600 text-[10px] font-mono uppercase tracking-widest">Or using email</span>
                      <div className="flex-grow border-t border-gray-800"></div>
                   </div>
 
                   {successMsg && (
-                    <div className="p-3 bg-green-900/30 border border-green-500/30 rounded text-green-400 text-xs text-center flex items-center justify-center gap-2">
+                    <div className="p-3 bg-green-900/10 border border-green-500/20 rounded text-green-400 text-xs text-center flex items-center justify-center gap-2 font-mono">
                       <CheckCircle2 className="w-4 h-4" /> {successMsg}
                     </div>
                   )}
 
-                  <form onSubmit={mode === 'login' ? handleLogin : handleSignup} className="space-y-4">
+                  <form onSubmit={mode === 'login' ? handleLogin : handleSignup} className="space-y-5">
                      {error && (
-                       <div className="p-3 bg-red-900/30 border border-red-500/30 rounded flex flex-col items-center justify-center gap-2 animate-in fade-in zoom-in duration-300">
-                         <div className="text-red-400 text-xs text-center flex items-center gap-2 font-bold">
-                            <AlertTriangle className="w-3 h-3" /> {error}
+                       <div className="p-4 bg-red-900/10 border border-red-500/20 rounded flex flex-col items-center justify-center gap-3 animate-in fade-in zoom-in duration-300">
+                         <div className="text-red-400 text-xs text-center flex items-center gap-2 font-bold font-mono">
+                            <AlertTriangle className="w-4 h-4" /> {error.toUpperCase()}
                          </div>
                          {showResend && (
-                            <div className="w-full mt-2 pt-2 border-t border-red-500/20">
-                               <div className="flex items-start gap-2 mb-2 px-2">
-                                  <Info className="w-3 h-3 text-red-300 mt-0.5" />
-                                  <p className="text-[10px] text-red-200/70 text-left leading-tight">
-                                     Check your <strong>Spam folder</strong> if you don't see the email.
-                                  </p>
-                               </div>
+                            <div className="w-full pt-3 border-t border-red-500/20">
                                <button
                                  type="button"
                                  onClick={handleResendVerification}
                                  disabled={resendLoading}
-                                 className="w-full py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs rounded border border-red-500/30 flex items-center justify-center gap-2 transition-colors font-bold"
+                                 className="w-full py-2 bg-red-500/10 hover:bg-red-500/20 text-red-300 text-[10px] font-mono uppercase tracking-wider rounded border border-red-500/20 flex items-center justify-center gap-2 transition-colors"
                                >
                                  {resendLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-                                 Resend Verification Email
+                                 Resend Email
                                </button>
                             </div>
                          )}
@@ -286,30 +278,30 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
                      )}
                      
                      <div>
-                        <label className="block text-xs font-mono text-gray-500 mb-1 ml-1">EMAIL ADDRESS</label>
+                        <label className="block text-[10px] font-mono text-cyber-cyan/70 uppercase tracking-widest mb-2 ml-1">Email</label>
                         <div className="relative">
-                           <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-600" />
+                           <Mail className="absolute left-4 top-3.5 w-4 h-4 text-gray-500" />
                            <input 
                               type="email" 
                               required
                               value={email}
                               onChange={e => setEmail(e.target.value)}
-                              className="w-full h-12 bg-black/40 border border-gray-800 rounded-lg pl-10 pr-4 text-white placeholder-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all"
-                              placeholder="trader@signalix.ai"
+                              className="w-full h-12 bg-[#050508] border border-gray-800 rounded focus:border-cyber-cyan/50 focus:ring-1 focus:ring-cyber-cyan/20 outline-none transition-all pl-11 pr-4 text-white text-sm font-mono placeholder-gray-700"
+                              placeholder="trader@signalix.io"
                            />
                         </div>
                      </div>
                      
                      <div>
-                        <label className="block text-xs font-mono text-gray-500 mb-1 ml-1">PASSWORD</label>
+                        <label className="block text-[10px] font-mono text-cyber-cyan/70 uppercase tracking-widest mb-2 ml-1">Password</label>
                         <div className="relative">
-                           <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-600" />
+                           <Lock className="absolute left-4 top-3.5 w-4 h-4 text-gray-500" />
                            <input 
                               type="password" 
                               required
                               value={password}
                               onChange={e => setPassword(e.target.value)}
-                              className="w-full h-12 bg-black/40 border border-gray-800 rounded-lg pl-10 pr-4 text-white placeholder-gray-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all"
+                              className="w-full h-12 bg-[#050508] border border-gray-800 rounded focus:border-cyber-cyan/50 focus:ring-1 focus:ring-cyber-cyan/20 outline-none transition-all pl-11 pr-4 text-white text-sm font-mono placeholder-gray-700"
                               placeholder="••••••••••••"
                            />
                         </div>
@@ -320,7 +312,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
                            <button 
                               type="button"
                               onClick={() => switchMode('forgot-password')}
-                              className="text-xs text-cyan-500 hover:text-cyan-400 transition-colors"
+                              className="text-[10px] font-mono uppercase tracking-wide text-gray-500 hover:text-cyber-cyan transition-colors"
                            >
                               Forgot Password?
                            </button>
@@ -330,25 +322,25 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
                      <button 
                         type="submit"
                         disabled={isEmailLoading}
-                        className="w-full h-12 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold text-sm hover:brightness-110 transition-all shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-cyber-cyan hover:bg-cyan-400 text-black font-bold font-mono text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,243,255,0.2)] hover:shadow-[0_0_30px_rgba(0,243,255,0.4)] flex items-center justify-center gap-2 clip-path-polygon"
                      >
                         {isEmailLoading ? (
-                           <Loader2 className="w-5 h-5 animate-spin" />
+                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                            <>
-                              {mode === 'login' ? 'Sign In' : 'Create Account'} <ArrowRight className="w-4 h-4" />
+                              {mode === 'login' ? 'ACCESS TERMINAL' : 'INITIALIZE'} <ArrowRight className="w-4 h-4" />
                            </>
                         )}
                      </button>
                   </form>
                </div>
 
-               <div className="mt-6 text-center">
+               <div className="mt-8 text-center pt-6 border-t border-gray-800/50">
                   <button 
                      onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
-                     className="text-sm text-gray-500 hover:text-cyan-400 transition-colors"
+                     className="text-xs font-mono text-gray-400 hover:text-white transition-colors uppercase tracking-wide"
                   >
-                     {mode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                     {mode === 'login' ? "New User? Create Account" : "Existing User? Sign In"}
                   </button>
                </div>
             </>
@@ -356,13 +348,20 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
 
         </div>
         
-        <p className="text-center text-xs text-gray-600 mt-8">
-           Protected by institutional-grade encryption.
-        </p>
+        <div className="mt-8 flex justify-center gap-2 text-[10px] text-gray-600 font-mono uppercase tracking-widest">
+           <Shield className="w-3 h-3" />
+           <span>Secure 256-bit Encryption</span>
+        </div>
 
       </div>
     </div>
   );
 };
+
+const Shield = ({ className }: { className?: string }) => (
+   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+   </svg>
+);
 
 export default AuthPage;
