@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Activity, Coins, RefreshCw, Zap, LogOut, User, ChevronDown, Crown, CreditCard } from 'lucide-react';
+import { Activity, Coins, RefreshCw, Zap, LogOut, User, ChevronDown, Crown, CreditCard, UserCircle2, Terminal } from 'lucide-react';
 import { CryptoPair, FeedItem, AggregationResult, UserProfile } from '../types';
 import { COST_PER_ANALYSIS } from '../constants';
 import { fetchOHLCData } from '../services/cryptoService';
@@ -82,14 +82,14 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
 
   const handlePairSelect = (pair: CryptoPair) => {
     setSelectedPair(pair);
-    addFeedItem('user-selection', { text: `${pair.symbol} selected` });
+    addFeedItem('user-selection', { text: `Selected Market: ${pair.symbol}` });
     addFeedItem('system-message', { text: "Great choice. Now select your trading timeframe." });
     setSessionState('timeframe-select');
   };
 
   const handleTimeframeSelect = (tf: string) => {
     setSelectedTimeframe(tf);
-    addFeedItem('user-selection', { text: `${tf} timeframe` });
+    addFeedItem('user-selection', { text: `Selected Timeframe: ${tf}` });
     setSessionState('analyzing');
     runAnalysis(selectedPair!, tf);
   };
@@ -299,7 +299,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
              >
                <Coins className="w-4 h-4 text-yellow-500" />
                <span className="text-xs font-mono font-bold hidden md:inline">{credits} credits</span>
-               <span className="text-[10px] uppercase bg-purple-500 text-white px-1.5 rounded ml-1">Get Pro</span>
+               <span className="text-xs uppercase bg-purple-500 text-white px-1.5 rounded ml-1 font-bold">Get Pro</span>
              </button>
            )}
            
@@ -370,33 +370,44 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       </header>
 
       {/* Main Feed Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 relative scroll-smooth">
+      <main className="flex-1 overflow-y-auto p-4 md:p-6 relative scroll-smooth">
         {/* Background Ambient */}
         <div className="fixed inset-0 pointer-events-none z-0">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-900/10 rounded-full blur-[120px]"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 rounded-full blur-[120px]"></div>
         </div>
 
-        <div className="max-w-3xl mx-auto relative z-10 flex flex-col gap-6 pb-20">
+        <div className="max-w-3xl mx-auto relative z-10 flex flex-col gap-4 pb-20">
           {feed.map((item) => (
-            <div key={item.id} className="w-full">
+            <div key={item.id} className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+              
+              {/* System Messages (Now full width, flat look) */}
               {item.type === 'system-message' && (
-                <div className="flex gap-4 animate-in fade-in slide-in-from-left-4 duration-500">
-                   <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center shrink-0 border border-gray-700 mt-1">
-                      <span className="text-purple-500 font-bold text-xs">AI</span>
+                <div className="bg-[#13131f] border border-purple-500/20 p-4 rounded-xl flex gap-4 items-center shadow-sm">
+                   <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0 border border-purple-500/20">
+                      <Terminal className="w-5 h-5 text-purple-400" />
                    </div>
-                   <div className="bg-gray-900/80 border border-gray-800 p-4 rounded-r-xl rounded-bl-xl text-sm text-gray-300 leading-relaxed shadow-lg">
+                   <div className="text-gray-300 text-sm leading-relaxed">
+                     <span className="block text-[10px] font-bold text-purple-500 uppercase tracking-wider mb-0.5">System Notification</span>
                      {item.data.text}
                    </div>
                 </div>
               )}
+
+              {/* User Selection (Left aligned, log style) */}
               {item.type === 'user-selection' && (
-                <div className="flex justify-end animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="bg-purple-600 text-white px-4 py-2 rounded-l-xl rounded-br-xl text-sm font-medium shadow-[0_0_15px_rgba(147,51,234,0.3)]">
-                    {item.data.text}
-                  </div>
+                <div className="bg-[#13131f] border border-gray-800 p-4 rounded-xl flex gap-4 items-center">
+                   <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center shrink-0 border border-gray-700">
+                      <UserCircle2 className="w-5 h-5 text-gray-400" />
+                   </div>
+                   <div className="text-gray-300 text-sm">
+                      <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">User Action</span>
+                      {item.data.text}
+                   </div>
                 </div>
               )}
+
+              {/* Steps & Results */}
               {item.type === 'step-data' && (
                 <DataCollectionStep status={item.status} data={item.data?.rawData} pair={item.data?.pair} duration={item.data?.duration} />
               )}
@@ -410,21 +421,24 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                 <AIAnalysisStep status={item.status} result={item.data?.result} partialThought={item.data?.partialThought} duration={item.data?.duration} />
               )}
               {item.type === 'step-verdict' && (
-                <div className="mt-4 mb-8"><VerdictCard result={item.data.result} /></div>
+                <div className="mt-2 mb-8"><VerdictCard result={item.data.result} /></div>
               )}
             </div>
           ))}
 
-          <div className="mt-4">
+          {/* Interactive Selectors (Appended at bottom) */}
+          <div className="mt-2">
              {sessionState === 'pair-select' && (<PairSelector onSelect={handlePairSelect} />)}
              {sessionState === 'timeframe-select' && (<TimeframeSelector onSelect={handleTimeframeSelect} />)}
              {sessionState === 'complete' && (
-               <div className="text-center animate-in fade-in duration-700 delay-500">
-                 <button onClick={resetSession} className="px-8 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-full text-sm font-bold text-white transition-all hover:scale-105">Analyze Another Pair</button>
+               <div className="text-center animate-in fade-in duration-700 delay-500 py-6">
+                 <button onClick={resetSession} className="px-8 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-full text-sm font-bold text-white transition-all hover:scale-105 flex items-center gap-2 mx-auto">
+                   <RefreshCw className="w-4 h-4" /> Analyze Another Pair
+                 </button>
                </div>
              )}
           </div>
-          <div ref={bottomRef} className="h-10" />
+          <div ref={bottomRef} className="h-4" />
         </div>
       </main>
 
