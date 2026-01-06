@@ -162,8 +162,22 @@ const VerdictCard: React.FC<VerdictCardProps> = ({ result, pair }) => {
           <p className="text-gray-300 leading-relaxed text-sm font-medium pl-2">{result.summary}</p>
         </div>
 
+        {/* Real-Time Chart Section (Moved Above Details) */}
+        {pair && (
+          <div className="mb-6 border border-gray-800/50 rounded-lg overflow-hidden bg-[#0b0b10] shadow-inner">
+            <div className="p-2 border-b border-gray-800/50 flex items-center gap-2 text-gray-400 bg-black/20">
+               <BarChart2 className="w-3 h-3 text-cyber-cyan" />
+               <span className="text-[10px] font-bold uppercase tracking-wider">Live Chart: {pair.base}/{pair.quote}</span>
+            </div>
+            <div 
+              ref={containerRef} 
+              className="w-full h-[320px]" 
+            ></div>
+          </div>
+        )}
+
         {/* 3 Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-gray-900/30 p-4 rounded border border-gray-800/50 hover:bg-gray-900/50 transition-colors">
             <h4 className="flex items-center gap-2 text-cyber-cyan text-xs font-bold uppercase mb-3">
               <TrendingUp className="w-3 h-3" /> Key Confirmations
@@ -206,20 +220,6 @@ const VerdictCard: React.FC<VerdictCardProps> = ({ result, pair }) => {
             </ul>
           </div>
         </div>
-
-        {/* Real-Time Chart Section */}
-        {pair && (
-          <div className="border-t border-gray-800 pt-6">
-            <div className="flex items-center gap-2 mb-4 text-gray-400">
-               <BarChart2 className="w-4 h-4 text-cyber-cyan" />
-               <span className="text-xs font-bold uppercase tracking-wider">Live Market Data: {pair.base}/{pair.quote}</span>
-            </div>
-            <div 
-              ref={containerRef} 
-              className="w-full h-[400px] rounded-lg overflow-hidden border border-gray-800/50 shadow-inner bg-[#0b0b10]"
-            ></div>
-          </div>
-        )}
 
       </div>
     </div>
