@@ -32,6 +32,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
     setError('');
     setSuccessMsg('');
     setShowResend(false);
+    setEmail('');
+    setPassword('');
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -157,9 +159,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
                  We've sent a secure verification link to:
               </p>
               
-              <div className="bg-black/40 border border-gray-800 rounded py-3 px-4 mb-8">
+              <div className="bg-black/40 border border-gray-800 rounded py-3 px-4 mb-6">
                  <span className="text-cyber-cyan font-mono text-sm tracking-wide">{email}</span>
               </div>
+
+              <p className="text-xs text-gray-500 mb-8 font-mono">
+                 Can't find it in your inbox? Check your spam folder.
+              </p>
               
               <button 
                  onClick={() => switchMode('login')}

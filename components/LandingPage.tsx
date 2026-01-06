@@ -47,7 +47,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin, onNavi
             <div className="hidden md:flex items-center gap-8 text-xs font-mono text-gray-500 tracking-wider">
                <button onClick={() => scrollToSection('features')} className="hover:text-cyber-cyan cursor-pointer transition-colors uppercase">Features</button>
                <button onClick={() => scrollToSection('how-it-works')} className="hover:text-cyber-cyan cursor-pointer transition-colors uppercase">How it works</button>
-               <button onClick={onGetStarted} className="hover:text-cyber-cyan cursor-pointer transition-colors uppercase">Pricing</button>
             </div>
             <div className="flex items-center gap-6">
                <button onClick={onLogin} className="text-xs font-mono font-bold text-gray-400 hover:text-white transition-colors uppercase">
@@ -71,7 +70,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin, onNavi
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 border border-cyber-cyan/20 rounded-full bg-cyber-cyan/5 mb-10 backdrop-blur-sm">
              <div className="w-1.5 h-1.5 rounded-full bg-cyber-cyan animate-pulse"></div>
-             <span className="text-[10px] font-mono text-cyber-cyan tracking-[0.2em] uppercase">System Online v2.4.0</span>
+             <span className="text-[10px] font-mono text-cyber-cyan tracking-[0.2em] uppercase">System Online v2.8.0</span>
           </div>
 
           {/* Main Title */}
@@ -308,7 +307,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin, onNavi
                {/* Centered Disclaimer */}
                <div className="max-w-2xl mx-auto text-center">
                   <p className="text-[10px] text-gray-700 leading-relaxed font-sans opacity-70">
-                     RISK DISCLOSURE: Trading involves substantial risk. SignalixAI is an algorithmic tool, not a financial advisor. 
+                     Trading involves substantial risk. SignalixAI is an algorithmic tool, not a financial advisor. 
                      Past performance does not guarantee future results.
                   </p>
                </div>
