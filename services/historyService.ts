@@ -5,12 +5,27 @@ import {
   where, 
   limit, 
   getDocs,
+  orderBy,
   Timestamp 
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { HistoryItem, AIAnalysisResult, CryptoPair } from "../types";
 
 const COLLECTION_NAME = "analysis_history";
+
+// Helper to send logs to the server terminal
+const serverLog = (level: 'info' | 'warn' | 'error', message: string, details?: any) => {
+  // Print to browser console too
+  if (level === 'error') console.error(message, details);
+  else console.log(message, details);
+
+  // Fire and forget send to server
+  fetch('/api/log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ level, message, details })
+  }).catch(() => {}); // Ignore network errors for logs
+};
 
 // Robust sanitization to prevent "Unsupported Field Value: undefined" errors in Firestore
 const sanitizeData = (data: any): any => {
@@ -42,10 +57,10 @@ const sanitizeData = (data: any): any => {
 export const historyService = {
   
   async saveAnalysis(userId: string, pair: CryptoPair, timeframe: string, result: AIAnalysisResult) {
-    console.log(`[History] Attempting to save analysis for user: ${userId}`);
+    serverLog('info', `[History] Attempting to save analysis for user: ${userId}`);
     
     if (!userId) {
-      console.error("[History] Error: No User ID provided.");
+      serverLog('error', "[History] Error: No User ID provided.");
       return;
     }
 
@@ -62,37 +77,33 @@ export const historyService = {
         timestamp: Timestamp.now()
       };
 
-      console.log("[History] Payload prepared, writing to Firestore...", payload);
-
       // 2. Write to Firestore
       const docRef = await addDoc(collection(db, COLLECTION_NAME), payload);
-      console.log(`[History] SUCCESS: Document written with ID: ${docRef.id}`);
+      serverLog('info', `[History] SUCCESS: Document written with ID: ${docRef.id}`);
       
     } catch (error: any) {
-      console.error("[History] SAVE FAILED. Check Firestore Console.", error);
+      serverLog('error', "[History] SAVE FAILED. Check Firestore Rules.", { code: error.code, message: error.message });
       
       if (error.code === 'permission-denied') {
-        console.error(">> PERMISSION DENIED: Please check your Firestore Security Rules. Ensure writes are allowed for authenticated users.");
-      } else if (error.code === 'unavailable') {
-        console.error(">> NETWORK ERROR: Check your internet connection or Firebase service status.");
+        serverLog('error', ">> PERMISSION DENIED: Please copy the rules from firestore.rules into your Firebase Console.");
       }
     }
   },
 
   async getUserHistory(userId: string, maxItems = 20): Promise<HistoryItem[]> {
-    console.log(`[History] Fetching items for user: ${userId}`);
+    serverLog('info', `[History] Fetching items for user: ${userId}`);
     try {
-      // Simple query: Filter by user, limit results. 
-      // We do NOT use orderBy here server-side to avoid needing a composite index immediately.
-      // We sort in memory client-side.
+      // Create a query that requires an index for ordering
+      // This will trigger the "Missing Index" link in the console error if the index doesn't exist
       const q = query(
         collection(db, COLLECTION_NAME),
         where("userId", "==", userId),
+        orderBy("timestamp", "desc"), // <--- This triggers the need for a composite index
         limit(50)
       );
 
       const querySnapshot = await getDocs(q);
-      console.log(`[History] Found ${querySnapshot.size} documents.`);
+      serverLog('info', `[History] Found ${querySnapshot.size} documents.`);
 
       const items = querySnapshot.docs.map(doc => {
         const data = doc.data();
@@ -115,15 +126,21 @@ export const historyService = {
         } as HistoryItem;
       });
 
-      // Sort Descending (Newest First) in memory
-      const sorted = items.sort((a, b) => b.timestamp - a.timestamp);
-      return sorted.slice(0, maxItems);
+      return items.slice(0, maxItems);
 
     } catch (error: any) {
-      console.error("[History] FETCH FAILED:", error);
-      if (error.message && error.message.includes("index")) {
-        console.error(">> MISSING INDEX: If you see a link in the error above, click it to create the index in Firebase Console.");
+      serverLog('error', `[History] FETCH FAILED: ${error.message}`);
+      
+      // If permission denied
+      if (error.code === 'permission-denied') {
+        serverLog('warn', ">> ACTION REQUIRED: Go to Firebase Console > Firestore > Rules and allow read/write for 'analysis_history'.");
       }
+
+      // If missing index
+      if (error.message && error.message.includes("index")) {
+        serverLog('warn', ">> INDEX REQUIRED: Click the link in the browser console error to create the index.");
+      }
+      
       return [];
     }
   }

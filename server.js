@@ -19,6 +19,24 @@ app.use(express.json());
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
+// --- REMOTE LOGGING ENDPOINT ---
+// Allows client to print logs to the server terminal
+app.post('/api/log', (req, res) => {
+  const { level, message, details } = req.body;
+  const timestamp = new Date().toLocaleTimeString();
+  
+  const color = level === 'error' ? '\x1b[31m' : level === 'warn' ? '\x1b[33m' : '\x1b[36m';
+  const reset = '\x1b[0m';
+
+  console.log(`${color}[CLIENT ${timestamp}] [${level?.toUpperCase()}] ${message}${reset}`);
+  if (details) {
+    if (typeof details === 'object') console.dir(details, { depth: null, colors: true });
+    else console.log(details);
+  }
+  
+  res.sendStatus(200);
+});
+
 // --- GEMINI AI ANALYSIS ENDPOINT ---
 const MODEL_CHAIN = [
   'gemini-3-pro-preview',
