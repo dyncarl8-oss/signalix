@@ -2,29 +2,27 @@ import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
 import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
+import TermsPage from './components/TermsPage';
+import PrivacyPage from './components/PrivacyPage';
+import RiskPage from './components/RiskPage';
 import { userService } from './services/userService';
 import { UserProfile } from './types';
 import { auth } from './firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Loader2 } from 'lucide-react';
 
-type ViewState = 'landing' | 'auth' | 'dashboard';
+export type ViewState = 'landing' | 'auth' | 'dashboard' | 'terms' | 'privacy' | 'risk';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewState>('landing');
   const [user, setUser] = useState<UserProfile | null>(null);
-  // We initialize loading to true to cover the initial Firebase handshake.
   const [loading, setLoading] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
 
   // Listen for Firebase Auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      // NOTE: We do NOT set loading(true) here unconditionally. 
-      // Doing so causes the AuthPage to unmount/remount, losing the "Verify Email" state.
-
       if (firebaseUser) {
-        // User is signed in with Firebase.
         try {
           await firebaseUser.reload();
         } catch (e) {
@@ -32,10 +30,8 @@ export default function App() {
         }
 
         if (firebaseUser.emailVerified) {
-          // Only show loader if we are actually proceeding to fetch data/dashboard
           setLoading(true); 
           try {
-            // Check for payment success param in URL
             const params = new URLSearchParams(window.location.search);
             const paymentSuccess = params.get('payment') === 'success';
 
@@ -50,8 +46,10 @@ export default function App() {
                setUser(profile);
             }
             
-            // Switch to dashboard if authenticated
-            setCurrentView('dashboard');
+            // Only switch to dashboard if we are currently on a non-public page
+            if (currentView === 'auth' || currentView === 'landing') {
+              setCurrentView('dashboard');
+            }
           } catch (e) {
             console.error("Error fetching user profile", e);
             setUser(null);
@@ -60,23 +58,18 @@ export default function App() {
             setLoading(false);
           }
         } else {
-          // Email not verified. 
-          // We treat this as "no user" for the app state, but we DO NOT show a loader.
-          // This keeps the AuthPage mounted so it can display the "Check Email" or error messages.
           setUser(null);
           setLoading(false); 
         }
       } else {
-        // User is signed out
         setUser(null);
-        // If we were on dashboard, go back to landing
-        setCurrentView(prev => prev === 'dashboard' ? 'landing' : prev);
+        if (currentView === 'dashboard') setCurrentView('landing');
         setLoading(false);
       }
     });
 
     return () => unsubscribe();
-  }, []); // Removed currentView dependency to prevent double-loading on view change
+  }, [currentView]);
 
   const handleLoginSuccess = (userData: UserProfile) => {
     setUser(userData);
@@ -88,7 +81,6 @@ export default function App() {
     setCurrentView('landing'); 
   };
 
-  // Only show full screen loader if we are doing significant data fetching or initial load
   if (loading || processingPayment) {
     return (
       <div className="min-h-screen bg-[#050508] flex flex-col gap-4 items-center justify-center">
@@ -112,6 +104,7 @@ export default function App() {
              if (user) setCurrentView('dashboard');
              else setCurrentView('auth');
           }}
+          onNavigate={(view) => setCurrentView(view)}
         />
       )}
 
@@ -128,6 +121,10 @@ export default function App() {
           onLogout={handleLogout} 
         />
       )}
+
+      {currentView === 'terms' && <TermsPage onBack={() => setCurrentView('landing')} />}
+      {currentView === 'privacy' && <PrivacyPage onBack={() => setCurrentView('landing')} />}
+      {currentView === 'risk' && <RiskPage onBack={() => setCurrentView('landing')} />}
     </>
   );
 }

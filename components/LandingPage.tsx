@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Activity, ArrowRight, Terminal, Cpu, Shield, Zap, Globe, Lock, BarChart3, TrendingUp, Network, Clock } from 'lucide-react';
+import { ViewState } from '../App';
 
 interface LandingPageProps {
   onGetStarted: () => void;
   onLogin: () => void;
+  onNavigate: (view: ViewState) => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin, onNavigate }) => {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${scrollY > 20 ? 'bg-cyber-black/90 backdrop-blur-md border-cyber-border' : 'bg-transparent border-transparent'}`}>
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
             <div className="w-8 h-8 flex items-center justify-center border border-cyber-cyan/30 rounded bg-cyber-cyan/5">
                <Activity className="text-cyber-cyan w-5 h-5" />
             </div>
@@ -274,7 +276,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
       </section>
 
       {/* CTA Footer */}
-      <footer className="py-32 px-6 relative border-t border-gray-900 bg-[#050508] overflow-hidden">
+      <footer className="py-24 px-6 relative border-t border-gray-900 bg-[#050508] overflow-hidden">
          <div className="absolute inset-0 cyber-grid opacity-20"></div>
          
          <div className="max-w-4xl mx-auto text-center relative z-10">
@@ -291,12 +293,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onLogin }) => {
                Create Free Account
             </button>
 
-            <div className="mt-32 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-600 font-mono uppercase tracking-wider border-t border-gray-900 pt-8">
-               <div>© 2026 SIGNALIX_AI SYSTEMS</div>
-               <div className="flex gap-8 mt-4 md:mt-0">
-                  <span className="hover:text-cyber-cyan cursor-pointer transition-colors">Terms</span>
-                  <span className="hover:text-cyber-cyan cursor-pointer transition-colors">Privacy</span>
-                  <span className="hover:text-cyber-cyan cursor-pointer transition-colors">Status</span>
+            <div className="mt-24 border-t border-gray-900 pt-12">
+               <div className="flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-600 font-mono uppercase tracking-wider mb-8">
+                  <div>© 2026 SIGNALIX_AI SYSTEMS</div>
+                  <div className="flex gap-8 mt-4 md:mt-0">
+                     <span onClick={() => onNavigate('terms')} className="hover:text-cyber-cyan cursor-pointer transition-colors">Terms</span>
+                     <span onClick={() => onNavigate('privacy')} className="hover:text-cyber-cyan cursor-pointer transition-colors">Privacy</span>
+                     <span onClick={() => onNavigate('risk')} className="hover:text-red-500 cursor-pointer transition-colors">Risk</span>
+                  </div>
+               </div>
+               
+               {/* Risk Disclosure */}
+               <div className="max-w-3xl mx-auto text-center space-y-3">
+                  <p className="text-[10px] text-gray-700 leading-relaxed font-sans">
+                     <strong>RISK DISCLOSURE:</strong> Trading in financial markets involves a high degree of risk and is not suitable for everyone. 
+                     You could lose some or all of your initial investment; do not invest money that you cannot afford to lose. 
+                     SignalixAI is an algorithmic analysis tool, not a financial advisor. Signals generated are for educational purposes only.
+                  </p>
+                  <p className="text-[10px] text-gray-700 leading-relaxed font-sans">
+                     Past performance of AI predictions does not guarantee future results. Market conditions can change rapidly. 
+                     SignalixAI assumes no liability for any trading losses incurred by using this platform.
+                  </p>
                </div>
             </div>
          </div>
