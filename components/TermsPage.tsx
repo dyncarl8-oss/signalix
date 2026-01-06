@@ -98,7 +98,7 @@ const TermsPage: React.FC<TermsPageProps> = ({ onBack }) => {
 
            <div className="pt-12 border-t border-gray-800 text-center">
               <p className="text-xs text-gray-600 font-mono">
-                 Questions? Contact legal@signalix.io
+                 Questions? Contact contact@realanima.online
               </p>
            </div>
 

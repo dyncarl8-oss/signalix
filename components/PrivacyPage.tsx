@@ -86,7 +86,7 @@ const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
 
            <div className="pt-12 border-t border-gray-800 text-center">
               <p className="text-xs text-gray-600 font-mono">
-                 Data Protection Officer: privacy@signalix.io
+                 Data Protection Officer: contact@realanima.online
               </p>
            </div>
 
