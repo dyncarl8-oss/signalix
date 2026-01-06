@@ -39,15 +39,16 @@ export const PairSelector: React.FC<{ onSelect: (pair: CryptoPair) => void }> = 
             <h4 className="text-[10px] font-bold text-cyber-cyan uppercase mb-3 flex items-center gap-2 sticky top-0 bg-[#0b0b10] py-2 z-10">
                <TrendingUp className="w-3 h-3" /> Crypto Markets
             </h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
               {crypto.map(pair => (
                 <button
                   key={pair.symbol}
                   onClick={() => onSelect(pair)}
-                  className="px-3 py-3 rounded-lg bg-black/40 border border-gray-800 hover:border-cyber-cyan hover:text-cyber-cyan hover:bg-cyber-cyan/10 transition-all text-xs font-bold text-gray-300 flex flex-col items-center justify-center gap-1 group"
+                  className="px-2 py-2.5 rounded bg-black/40 border border-gray-800 hover:border-cyber-cyan hover:text-cyber-cyan hover:bg-cyber-cyan/10 transition-all text-xs font-bold text-gray-300 flex items-center justify-center group"
                 >
-                  <span>{pair.base}</span>
-                  <span className="text-[9px] text-gray-600 group-hover:text-cyber-cyan/70 font-mono">{pair.quote}</span>
+                  <span className="tracking-tight">{pair.base}</span>
+                  <span className="text-gray-600 group-hover:text-cyber-cyan/60 transition-colors">/</span>
+                  <span className="text-[10px] text-gray-500 group-hover:text-cyber-cyan/80 transition-colors font-mono">{pair.quote}</span>
                 </button>
               ))}
             </div>
@@ -59,15 +60,16 @@ export const PairSelector: React.FC<{ onSelect: (pair: CryptoPair) => void }> = 
             <h4 className="text-[10px] font-bold text-cyber-magenta uppercase mb-3 flex items-center gap-2 sticky top-0 bg-[#0b0b10] py-2 z-10">
                <Globe className="w-3 h-3" /> Forex Markets
             </h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
                {forex.map(pair => (
                 <button
                   key={pair.symbol}
                   onClick={() => onSelect(pair)}
-                  className="px-3 py-3 rounded-lg bg-black/40 border border-gray-800 hover:border-cyber-magenta hover:text-cyber-magenta hover:bg-cyber-magenta/10 transition-all text-xs font-bold text-gray-300 flex flex-col items-center justify-center gap-1 group"
+                  className="px-2 py-2.5 rounded bg-black/40 border border-gray-800 hover:border-cyber-magenta hover:text-cyber-magenta hover:bg-cyber-magenta/10 transition-all text-xs font-bold text-gray-300 flex items-center justify-center group"
                 >
-                  <span>{pair.base}</span>
-                  <span className="text-[9px] text-gray-600 group-hover:text-cyber-magenta/70 font-mono">{pair.quote}</span>
+                  <span className="tracking-tight">{pair.base}</span>
+                  <span className="text-gray-600 group-hover:text-cyber-magenta/60 transition-colors">/</span>
+                  <span className="text-[10px] text-gray-500 group-hover:text-cyber-magenta/80 transition-colors font-mono">{pair.quote}</span>
                 </button>
               ))}
             </div>
