@@ -90,6 +90,15 @@ export interface AIAnalysisResult {
   thoughtProcess?: string;
 }
 
+export interface HistoryItem {
+  id: string;
+  userId: string;
+  pair: CryptoPair;
+  timeframe: string;
+  timestamp: number;
+  result: AIAnalysisResult;
+}
+
 export type FeedItemType = 
   | 'user-selection'
   | 'step-data'
