@@ -121,7 +121,8 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
 
      // Reconstruct the Feed
      // 1. Initial Selection Messages
-     addFeedItem('user-selection', { text: `Selected Market: ${item.pair.symbol}` });
+     const pairSymbol = item.pair?.symbol || 'Unknown Pair';
+     addFeedItem('user-selection', { text: `Selected Market: ${pairSymbol}` });
      addFeedItem('user-selection', { text: `Selected Timeframe: ${item.timeframe}` });
 
      addFeedItem('system-message', { text: `Restoring analysis from ${new Date(item.timestamp).toLocaleString()}...` });
@@ -130,22 +131,23 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
      let mockOHLC: OHLCData[] | undefined = undefined;
      if (item.marketSummary) {
        // Create minimal OHLC array to satisfy DataCollectionStep display logic
+       // Ensure values are numbers (fallback to 0) to avoid rendering crashes
        mockOHLC = [
          { 
-           open: item.marketSummary.openPrice, 
-           close: item.marketSummary.openPrice, 
-           high: item.marketSummary.openPrice, 
-           low: item.marketSummary.openPrice, 
+           open: item.marketSummary.openPrice || 0, 
+           close: item.marketSummary.openPrice || 0, 
+           high: item.marketSummary.openPrice || 0, 
+           low: item.marketSummary.openPrice || 0, 
            time: item.timestamp, 
            volumeto: 0 
          },
          { 
-           open: item.marketSummary.currentPrice, 
-           close: item.marketSummary.currentPrice, 
-           high: item.marketSummary.currentPrice, 
-           low: item.marketSummary.currentPrice, 
+           open: item.marketSummary.currentPrice || 0, 
+           close: item.marketSummary.currentPrice || 0, 
+           high: item.marketSummary.currentPrice || 0, 
+           low: item.marketSummary.currentPrice || 0, 
            time: item.timestamp, 
-           volumeto: item.marketSummary.volume24h 
+           volumeto: item.marketSummary.volume24h || 0
          }
        ];
      }
@@ -154,7 +156,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
      setTimeout(() => {
         // Data Step - Always add, even if data is partial
         addFeedItem('step-data', { 
-           pair: item.pair.symbol, 
+           pair: pairSymbol, 
            rawData: mockOHLC, 
            duration: 0.5 
         }, 'complete');
@@ -178,7 +180,9 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
         }, 'complete');
 
         // Verdict Step - Always add
-        addFeedItem('step-verdict', { result: item.result, pair: item.pair });
+        if (item.result) {
+          addFeedItem('step-verdict', { result: item.result, pair: item.pair });
+        }
 
      }, 100);
   };
