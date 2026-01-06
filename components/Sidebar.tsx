@@ -1,240 +1,221 @@
-import React, { useState } from 'react';
-import { SUPPORTED_PAIRS, TIMEFRAMES } from '../constants';
-import { CryptoPair, HistoryItem } from '../types';
-import { Zap, Activity, Lock, Coins, BarChart2, Crown, History, PlayCircle, Clock, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { CryptoPair, HistoryItem, UserProfile } from '../types';
+import { 
+  Activity, 
+  Clock, 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  Minus, 
+  LogOut, 
+  Crown, 
+  Zap, 
+  CreditCard, 
+  UserCircle2, 
+  Settings,
+  ChevronUp,
+  Sparkles
+} from 'lucide-react';
 
 interface SidebarProps {
-  selectedPair: CryptoPair;
-  onSelectPair: (pair: CryptoPair) => void;
-  selectedTimeframe: string;
-  onSelectTimeframe: (tf: string) => void;
+  user: UserProfile;
   credits: number;
-  onAnalyze: () => void;
-  isAnalyzing: boolean;
+  onLogout: () => void;
   onOpenPricing: () => void;
-  isPro?: boolean;
+  onOpenSubscription: () => void;
   history: HistoryItem[];
   onLoadHistory: (item: HistoryItem) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-  selectedPair,
-  onSelectPair,
-  selectedTimeframe,
-  onSelectTimeframe,
+  user,
   credits,
-  onAnalyze,
-  isAnalyzing,
+  onLogout,
   onOpenPricing,
-  isPro,
+  onOpenSubscription,
   history,
   onLoadHistory
 }) => {
-  const [activeTab, setActiveTab] = useState<'scanner' | 'history'>('scanner');
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const formatTime = (ts: number) => {
     const d = new Date(ts);
-    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
-    <div className="w-full lg:w-80 flex flex-col h-full border-r border-cyber-border bg-cyber-dark/50 overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-[#050508] border-r border-gray-800 relative overflow-hidden">
       
-      {/* Brand & Credits Fixed Top */}
-      <div className="p-4 bg-[#050508]/90 backdrop-blur z-10 border-b border-gray-800">
-        <div className="flex items-center gap-2 mb-4">
+      {/* 1. Branding Header */}
+      <div className="p-6 pb-4 shrink-0 bg-[#050508]/95 backdrop-blur z-10">
+        <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded bg-gradient-to-br from-cyber-cyan to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.3)]">
             <Activity className="text-white w-5 h-5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tighter text-white">
-            SIGNALIX<span className="text-cyber-cyan">AI</span>
+          <h1 className="text-xl font-bold tracking-tighter text-white font-mono">
+            SIGNALIX<span className="text-cyber-cyan">_AI</span>
           </h1>
         </div>
-
-        {/* Credit Status */}
-        <div className="glass-panel p-3 rounded-lg relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-            {isPro ? <Crown className="w-10 h-10" /> : <Zap className="w-10 h-10" />}
-          </div>
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-gray-400 text-[10px] font-mono uppercase">{isPro ? 'Membership' : 'Neural Credits'}</span>
-            {isPro ? <Crown className="w-3 h-3 text-yellow-500" /> : <Coins className="w-3 h-3 text-yellow-500" />}
-          </div>
-          
-          {isPro ? (
-             <div className="text-xl font-bold font-mono text-yellow-500">PRO <span className="text-xs text-gray-500 font-sans font-normal">active</span></div>
-          ) : (
-             <div className="text-xl font-bold font-mono text-white">{credits} <span className="text-xs text-gray-500 font-sans font-normal">available</span></div>
-          )}
-
-          {!isPro && (
-            <button 
-              onClick={onOpenPricing}
-              className="text-[10px] text-cyber-cyan hover:text-white transition-colors underline decoration-dotted mt-1"
-            >
-              Get Unlimited Access &rarr;
-            </button>
-          )}
+        <div className="mt-2 text-[10px] text-gray-500 font-mono uppercase tracking-widest pl-1">
+          Terminal v2.4.0
         </div>
       </div>
 
-      {/* Tab Switcher */}
-      <div className="flex border-b border-gray-800 bg-[#0a0a0f]">
-        <button
-          onClick={() => setActiveTab('scanner')}
-          className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${
-            activeTab === 'scanner' 
-              ? 'text-white border-b-2 border-cyber-cyan bg-white/5' 
-              : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
-          }`}
-        >
-          <PlayCircle className="w-3.5 h-3.5" /> Scanner
-        </button>
-        <button
-          onClick={() => setActiveTab('history')}
-          className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${
-            activeTab === 'history' 
-              ? 'text-white border-b-2 border-cyber-cyan bg-white/5' 
-              : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
-          }`}
-        >
-          <History className="w-3.5 h-3.5" /> History
-        </button>
+      {/* 2. History List (Scrollable) */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-2">
+        <div className="flex items-center gap-2 mb-4 px-2 opacity-50">
+           <Clock className="w-3 h-3 text-gray-400" />
+           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Analysis Logs</span>
+        </div>
+
+        {history.length === 0 ? (
+          <div className="text-center py-12 border border-dashed border-gray-800 rounded-lg bg-gray-900/20 mx-2">
+            <p className="text-xs text-gray-500 font-mono mb-2">No logs found</p>
+            <p className="text-[10px] text-gray-600">Run a scan to generate history</p>
+          </div>
+        ) : (
+          <div className="space-y-2 pb-4">
+            {history.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => onLoadHistory(item)}
+                className="w-full group bg-[#0a0a0f] hover:bg-[#15151a] border border-gray-800/50 hover:border-gray-700 rounded-lg p-3 transition-all text-left relative overflow-hidden"
+              >
+                {/* Result Indicator Line */}
+                <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${
+                   item.result.verdict === 'UP' ? 'bg-green-500' :
+                   item.result.verdict === 'DOWN' ? 'bg-red-500' : 'bg-yellow-500'
+                }`}></div>
+
+                <div className="flex justify-between items-start mb-1.5 pl-2">
+                  <div className="flex items-center gap-2">
+                     <span className="font-bold text-gray-200 text-sm">{item.pair.base}/{item.pair.quote}</span>
+                     <span className="text-[10px] text-gray-500 font-mono bg-gray-900 px-1 rounded">{item.timeframe}</span>
+                  </div>
+                  <span className={`text-[10px] font-bold flex items-center gap-1 ${
+                      item.result.verdict === 'UP' ? 'text-green-400' :
+                      item.result.verdict === 'DOWN' ? 'text-red-400' : 'text-yellow-400'
+                  }`}>
+                      {item.result.verdict === 'UP' && <ArrowUpRight className="w-3 h-3" />}
+                      {item.result.verdict === 'DOWN' && <ArrowDownRight className="w-3 h-3" />}
+                      {item.result.verdict === 'NEUTRAL' && <Minus className="w-3 h-3" />}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center pl-2">
+                   <span className="text-[10px] text-gray-600 font-mono">{formatTime(item.timestamp)}</span>
+                   <span className="text-[10px] text-cyber-cyan opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                      Load <ArrowUpRight className="w-2 h-2" />
+                   </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Scrollable Content Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+      {/* 3. Footer Section (Fixed) */}
+      <div className="shrink-0 p-4 border-t border-gray-800 bg-[#08080c] relative z-20">
         
-        {/* SCANNER TAB */}
-        {activeTab === 'scanner' && (
-          <div className="flex flex-col gap-6">
-            {/* Pair Selector */}
-            <div>
-              <label className="text-xs text-gray-500 font-mono uppercase mb-2 block">Market Asset</label>
-              <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
-                {SUPPORTED_PAIRS.map(pair => (
-                  <button
-                    key={pair.symbol}
-                    onClick={() => onSelectPair(pair)}
-                    className={`flex items-center justify-between p-3 rounded border transition-all duration-200 text-sm ${
-                      selectedPair.symbol === pair.symbol
-                        ? 'bg-cyber-cyan/10 border-cyber-cyan/50 text-white shadow-[0_0_10px_rgba(0,243,255,0.1)]'
-                        : 'bg-cyber-panel border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-200'
-                    }`}
-                  >
-                    <div className="flex flex-col items-start">
-                      <span className="font-bold">{pair.base}</span>
-                      <span className="text-[10px] opacity-60">{pair.name}</span>
-                    </div>
-                    <span className="text-xs font-mono text-gray-500">{pair.quote}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+        {/* Credits / Plan Status Display */}
+        <div className="mb-4 bg-gradient-to-br from-gray-900 to-black border border-gray-800 p-4 rounded-xl relative overflow-hidden group">
+           {/* Glow Effect */}
+           {user.isPro && <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-500/10 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>}
+           {!user.isPro && <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>}
 
-            {/* Timeframe Selector */}
-            <div>
-              <label className="text-xs text-gray-500 font-mono uppercase mb-2 block">Time Horizon</label>
-              <div className="grid grid-cols-4 gap-2">
-                {TIMEFRAMES.map(tf => (
-                  <button
-                    key={tf.value}
-                    onClick={() => onSelectTimeframe(tf.value)}
-                    className={`p-2 rounded border text-xs font-mono transition-all duration-200 ${
-                      selectedTimeframe === tf.value
-                        ? 'bg-cyber-magenta/10 border-cyber-magenta/50 text-white shadow-[0_0_10px_rgba(255,0,255,0.1)]'
-                        : 'bg-cyber-panel border-transparent text-gray-400 hover:border-gray-600'
-                    }`}
-                  >
-                    {tf.label}
-                  </button>
-                ))}
+           <div className="flex justify-between items-start relative z-10">
+              <div className="flex flex-col">
+                 <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">
+                    {user.isPro ? 'Plan Status' : 'Credits Available'}
+                 </span>
+                 <div className="flex items-baseline gap-1">
+                    <span className={`text-2xl font-mono font-bold ${user.isPro ? 'text-yellow-400' : 'text-white'}`}>
+                       {user.isPro ? 'PRO' : credits}
+                    </span>
+                    {user.isPro && <span className="text-[10px] text-yellow-500/70 font-bold uppercase">Active</span>}
+                 </div>
               </div>
-            </div>
-            
-            {/* Spacer for button visibility */}
-            <div className="h-20"></div>
-          </div>
-        )}
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${user.isPro ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-gray-800 border-gray-700'}`}>
+                 {user.isPro ? <Crown className="w-4 h-4 text-yellow-500" /> : <Zap className="w-4 h-4 text-purple-400" />}
+              </div>
+           </div>
 
-        {/* HISTORY TAB */}
-        {activeTab === 'history' && (
-          <div className="space-y-3">
-             {history.length === 0 ? (
-               <div className="text-center py-10 text-gray-500">
-                 <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                 <p className="text-xs font-mono">No analysis history found.</p>
+           {!user.isPro ? (
+             <button 
+               onClick={onOpenPricing}
+               className="w-full mt-3 py-2 text-xs font-bold bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg text-cyber-cyan transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_15px_rgba(0,243,255,0.1)]"
+             >
+               <Sparkles className="w-3 h-3" /> Get Pro Access
+             </button>
+           ) : (
+             <div className="mt-2 text-[10px] text-gray-600 font-mono">
+                Next billing: Auto-renewal active
+             </div>
+           )}
+        </div>
+
+        {/* User Profile Dropdown Area */}
+        <div className="relative" ref={profileRef}>
+          {isProfileOpen && (
+            <div className="absolute bottom-full left-0 w-full mb-2 bg-[#13131a] border border-gray-800 rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2 fade-in duration-200">
+               <div className="p-3 border-b border-gray-800/50">
+                  <p className="text-white text-xs font-bold truncate">{user.name}</p>
+                  <p className="text-[10px] text-gray-500 truncate">{user.email}</p>
                </div>
-             ) : (
-               history.map((item) => (
-                 <button
-                   key={item.id}
-                   onClick={() => onLoadHistory(item)}
-                   className="w-full text-left bg-[#0f0f13] hover:bg-[#1a1a20] border border-gray-800 hover:border-gray-700 p-3 rounded-lg transition-all group relative overflow-hidden"
+               <div className="p-1">
+                 {user.isPro && (
+                   <button
+                     onClick={() => {
+                        setIsProfileOpen(false);
+                        onOpenSubscription();
+                     }}
+                     className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-white/5 hover:text-white rounded-lg transition-colors flex items-center gap-2"
+                   >
+                     <CreditCard className="w-3.5 h-3.5" /> Manage Subscription
+                   </button>
+                 )}
+                 <button 
+                   onClick={onLogout}
+                   className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-red-900/10 hover:text-red-300 rounded-lg transition-colors flex items-center gap-2"
                  >
-                   <div className="flex justify-between items-start mb-2 relative z-10">
-                      <div className="flex items-center gap-2">
-                         <span className="font-bold text-sm text-white">{item.pair.base}/{item.pair.quote}</span>
-                         <span className="text-[10px] bg-gray-800 px-1.5 py-0.5 rounded text-gray-400 font-mono">{item.timeframe}</span>
-                      </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border flex items-center gap-1 ${
-                        item.result.verdict === 'UP' ? 'bg-green-900/20 text-green-400 border-green-900/50' :
-                        item.result.verdict === 'DOWN' ? 'bg-red-900/20 text-red-400 border-red-900/50' :
-                        'bg-yellow-900/20 text-yellow-400 border-yellow-900/50'
-                      }`}>
-                        {item.result.verdict === 'UP' && <ArrowUpRight className="w-3 h-3" />}
-                        {item.result.verdict === 'DOWN' && <ArrowDownRight className="w-3 h-3" />}
-                        {item.result.verdict === 'NEUTRAL' && <Minus className="w-3 h-3" />}
-                        {item.result.verdict}
-                      </span>
-                   </div>
-                   <div className="flex justify-between items-center relative z-10">
-                      <span className="text-[10px] text-gray-600 font-mono">{formatTime(item.timestamp)}</span>
-                      <span className="text-[10px] text-cyber-cyan opacity-0 group-hover:opacity-100 transition-opacity">Load Result &rarr;</span>
-                   </div>
-                   
-                   {/* Verdict Glow */}
-                   <div className={`absolute right-0 top-0 bottom-0 w-1 ${
-                      item.result.verdict === 'UP' ? 'bg-green-500' :
-                      item.result.verdict === 'DOWN' ? 'bg-red-500' : 'bg-yellow-500'
-                   } opacity-50`}></div>
+                   <LogOut className="w-3.5 h-3.5" /> Sign Out
                  </button>
-               ))
-             )}
-          </div>
-        )}
-      </div>
+               </div>
+            </div>
+          )}
 
-      {/* Action Button (Only visible on Scanner tab) */}
-      {activeTab === 'scanner' && (
-        <div className="p-4 bg-[#050508] border-t border-gray-800">
-          <button
-            onClick={onAnalyze}
-            disabled={isAnalyzing || (!isPro && credits <= 0)}
-            className={`w-full py-4 rounded font-bold text-sm tracking-widest uppercase transition-all duration-300 relative overflow-hidden group ${
-              isAnalyzing 
-                ? 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700' 
-                : (isPro || credits > 0)
-                  ? 'bg-cyber-cyan/10 border border-cyber-cyan text-cyber-cyan hover:bg-cyber-cyan hover:text-black shadow-[0_0_20px_rgba(0,243,255,0.15)] hover:shadow-[0_0_30px_rgba(0,243,255,0.4)]'
-                  : 'bg-red-900/20 border border-red-800 text-red-500 cursor-not-allowed'
-            }`}
+          <button 
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className={`w-full flex items-center gap-3 p-2 rounded-xl border transition-all duration-200 ${isProfileOpen ? 'bg-gray-800 border-gray-700' : 'bg-transparent border-transparent hover:bg-gray-800/50 hover:border-gray-800'}`}
           >
-            {isAnalyzing ? (
-              <span className="flex items-center justify-center gap-2">
-                <BarChart2 className="animate-bounce w-4 h-4" /> Processing...
-              </span>
-            ) : (isPro || credits > 0) ? (
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <Zap className="w-4 h-4" /> Initiate Scan
-              </span>
+            {user.photoURL ? (
+              <img src={user.photoURL} alt={user.name} className="w-9 h-9 rounded-full border border-gray-700 object-cover" />
             ) : (
-              <span className="flex items-center justify-center gap-2">
-                <Lock className="w-4 h-4" /> Insufficient Credits
-              </span>
+              <div className="w-9 h-9 rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center shrink-0">
+                 <UserCircle2 className="w-5 h-5 text-gray-400" />
+              </div>
             )}
+            
+            <div className="flex-1 min-w-0 text-left">
+               <div className="text-xs font-bold text-gray-200 truncate">{user.name}</div>
+               <div className="text-[10px] text-gray-500 truncate font-mono">Online</div>
+            </div>
+
+            <ChevronUp className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
           </button>
         </div>
-      )}
+
+      </div>
     </div>
   );
 };

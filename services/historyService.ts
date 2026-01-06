@@ -3,7 +3,6 @@ import {
   addDoc, 
   query, 
   where, 
-  orderBy, 
   limit, 
   getDocs,
   Timestamp 
@@ -24,24 +23,26 @@ export const historyService = {
         result,
         timestamp: Timestamp.now()
       });
+      console.log("Analysis saved to history");
     } catch (error) {
       console.error("Error saving analysis to history:", error);
-      // Fail silently to not disrupt the UI flow
     }
   },
 
   async getUserHistory(userId: string, maxItems = 20): Promise<HistoryItem[]> {
     try {
+      // Note: We removed orderBy("timestamp", "desc") to prevent "Missing Index" errors
+      // if the compound index isn't created in Firebase Console manually.
+      // We will sort in memory instead.
       const q = query(
         collection(db, COLLECTION_NAME),
         where("userId", "==", userId),
-        orderBy("timestamp", "desc"),
-        limit(maxItems)
+        limit(50) // Fetch a bit more to sort client-side
       );
 
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map(doc => {
+      const items = querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -49,9 +50,12 @@ export const historyService = {
           pair: data.pair,
           timeframe: data.timeframe,
           result: data.result,
-          timestamp: data.timestamp.toMillis()
+          timestamp: data.timestamp && data.timestamp.toMillis ? data.timestamp.toMillis() : Date.now()
         };
       });
+
+      // Sort client-side (Newest first)
+      return items.sort((a, b) => b.timestamp - a.timestamp).slice(0, maxItems);
 
     } catch (error) {
       console.error("Error fetching history:", error);
