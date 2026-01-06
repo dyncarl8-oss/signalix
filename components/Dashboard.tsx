@@ -130,7 +130,6 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
      let mockOHLC: OHLCData[] | undefined = undefined;
      if (item.marketSummary) {
        // Create minimal OHLC array to satisfy DataCollectionStep display logic
-       // It usually looks at index 0 and index length-1 for change calculation
        mockOHLC = [
          { 
            open: item.marketSummary.openPrice, 
@@ -141,7 +140,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
            volumeto: 0 
          },
          { 
-           open: item.marketSummary.currentPrice, // Doesn't matter for change calc if using [0].open
+           open: item.marketSummary.currentPrice, 
            close: item.marketSummary.currentPrice, 
            high: item.marketSummary.currentPrice, 
            low: item.marketSummary.currentPrice, 
@@ -151,39 +150,34 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
        ];
      }
      
+     // We use a short timeout to allow the "Restoring..." message to render first
      setTimeout(() => {
-        // Data Step
+        // Data Step - Always add, even if data is partial
         addFeedItem('step-data', { 
            pair: item.pair.symbol, 
            rawData: mockOHLC, 
            duration: 0.5 
         }, 'complete');
 
-        // Technical Step
-        if (item.indicators) {
-           addFeedItem('step-technical', { 
-              indicators: item.indicators, 
-              duration: 0.8 
-           }, 'complete');
-        }
+        // Technical Step - Always add, indicators might be undefined for old items
+        addFeedItem('step-technical', { 
+            indicators: item.indicators, 
+            duration: 0.8 
+        }, 'complete');
 
-        // Aggregation Step
-        if (item.aggregation) {
-           addFeedItem('step-aggregation', { 
-              results: item.aggregation, 
-              duration: 0.4 
-           }, 'complete');
-        }
+        // Aggregation Step - Always add
+        addFeedItem('step-aggregation', { 
+            results: item.aggregation, 
+            duration: 0.4 
+        }, 'complete');
 
-        // AI Step
-        if (item.result) {
-           addFeedItem('step-ai', { 
-              result: item.result, 
-              duration: 2.1 
-           }, 'complete');
-        }
+        // AI Step - Always add
+        addFeedItem('step-ai', { 
+            result: item.result, 
+            duration: 2.1 
+        }, 'complete');
 
-        // Verdict Step
+        // Verdict Step - Always add
         addFeedItem('step-verdict', { result: item.result, pair: item.pair });
 
      }, 100);
@@ -466,7 +460,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
             {feed.map((item) => (
               <div key={item.id} className="w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                 
-                {/* System Messages (Restored Card Style) */}
+                {/* System Messages */}
                 {item.type === 'system-message' && (
                   <div className="bg-[#13131f] border border-gray-800/80 p-4 rounded-xl flex gap-4 items-center shadow-sm">
                      <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0 border border-purple-500/20">

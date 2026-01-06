@@ -29,6 +29,10 @@ const serverLog = (level: 'info' | 'warn' | 'error', message: string, details?: 
 const sanitizeData = (data: any): any => {
   if (data === null) return null;
   if (data === undefined) return null;
+  
+  // Handle NaN (Firestore doesn't like NaN in some contexts, safer to use null)
+  if (typeof data === 'number' && isNaN(data)) return null;
+  
   if (typeof data !== 'object') return data;
   if (data instanceof Date) return data; 
 

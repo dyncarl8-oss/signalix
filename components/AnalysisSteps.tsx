@@ -104,6 +104,11 @@ export const DataCollectionStep: React.FC<{
       {status === 'loading' && (
         <p className="text-gray-400 text-xs pl-1 font-mono animate-pulse">Fetching live market data from CryptoCompare...</p>
       )}
+      
+      {status === 'complete' && !data && (
+         <p className="text-gray-500 text-xs pl-1 font-mono italic">Historical price data archived/unavailable.</p>
+      )}
+
       {data && lastCandle && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 text-sm pt-1">
           <div>
@@ -183,6 +188,11 @@ export const TechnicalStep: React.FC<{
       {status === 'loading' && (
          <p className="text-xs text-gray-500 animate-pulse font-mono pl-1">Computing technical indicators...</p>
       )}
+
+      {status === 'complete' && !indicators && (
+         <p className="text-gray-500 text-xs pl-1 font-mono italic">Detailed technical data archived/unavailable.</p>
+      )}
+
       {indicators && (
         <div className="pb-1">
            <SectionHeader title="Momentum Indicators" />
@@ -219,6 +229,11 @@ export const AggregationStep: React.FC<{
       duration={duration}
     >
       {status === 'loading' && <p className="text-xs text-gray-500 animate-pulse font-mono pl-1">Weighing signals for confidence score...</p>}
+      
+      {status === 'complete' && !results && (
+         <p className="text-gray-500 text-xs pl-1 font-mono italic">Aggregation details archived/unavailable.</p>
+      )}
+
       {results && (
         <div className="space-y-6 pt-2">
           {/* Top Cards */}
@@ -298,6 +313,10 @@ export const AIAnalysisStep: React.FC<{
         <div className="pl-1">
           <p className="text-xs text-purple-400 animate-pulse font-mono">AI is Analyzing...</p>
         </div>
+      )}
+
+      {status === 'complete' && !content && (
+         <p className="text-gray-500 text-xs pl-1 font-mono italic">AI thought process archived/unavailable.</p>
       )}
       
       {content && (
