@@ -15,6 +15,7 @@ export type ViewState = 'landing' | 'auth' | 'dashboard' | 'terms' | 'privacy' |
 
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewState>('landing');
+  const [authInitialMode, setAuthInitialMode] = useState<'login' | 'signup'>('login');
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
@@ -103,11 +104,17 @@ export default function App() {
         <LandingPage 
           onGetStarted={() => {
              if (user) setCurrentView('dashboard');
-             else setCurrentView('auth');
+             else {
+               setAuthInitialMode('signup');
+               setCurrentView('auth');
+             }
           }}
           onLogin={() => {
              if (user) setCurrentView('dashboard');
-             else setCurrentView('auth');
+             else {
+               setAuthInitialMode('login');
+               setCurrentView('auth');
+             }
           }}
           onNavigate={(view) => setCurrentView(view)}
         />
@@ -115,6 +122,7 @@ export default function App() {
 
       {currentView === 'auth' && (
         <AuthPage 
+          initialMode={authInitialMode}
           onLoginSuccess={handleLoginSuccess}
           onBack={() => setCurrentView('landing')}
         />

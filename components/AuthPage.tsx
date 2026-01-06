@@ -6,12 +6,13 @@ import { UserProfile } from '../types';
 interface AuthPageProps {
   onLoginSuccess: (user: UserProfile) => void;
   onBack: () => void;
+  initialMode?: 'login' | 'signup';
 }
 
 type AuthMode = 'login' | 'signup' | 'forgot-password' | 'verify-sent';
 
-const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack }) => {
-  const [mode, setMode] = useState<AuthMode>('login');
+const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess, onBack, initialMode = 'login' }) => {
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   
   // Separate loading states to prevent UI flicker
   const [isEmailLoading, setIsEmailLoading] = useState(false);
