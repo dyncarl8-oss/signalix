@@ -139,12 +139,14 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
      setIsSidebarOpen(false);
 
      // Reconstruct the Feed
-     // 1. Initial Selection Messages
+     
+     // 1. Restoring message (Moved to top as requested)
+     addFeedItem('system-message', { text: `Restoring analysis from ${new Date(item.timestamp).toLocaleString()}...` });
+
+     // 2. Initial Selection Messages
      const pairSymbol = item.pair?.symbol || 'Unknown Pair';
      addFeedItem('user-selection', { text: `Selected Market: ${pairSymbol}` });
      addFeedItem('user-selection', { text: `Selected Timeframe: ${item.timeframe}` });
-
-     addFeedItem('system-message', { text: `Restoring analysis from ${new Date(item.timestamp).toLocaleString()}...` });
 
      // 2. Data Step (Reconstructed)
      let mockOHLC: OHLCData[] | undefined = undefined;
